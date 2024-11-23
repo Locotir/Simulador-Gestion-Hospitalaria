@@ -56,14 +56,15 @@ const std::string RESET = "\033[0m";
 
 
 
-void gestionarPacientes(int operacion, std::string db_pacientes, int id, int edad, std::string nombre) {
+void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
+    std::cout << "1";
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes);
-
+    std::cout << "Debug: id = " << id << ", edad = " << edad << ", nombre = " << nombre << std::endl;
+    
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
     if (id == -1) {
         // Si no se tienen nombre y edad, pedimos los datos al usuario
         if (nombre.empty() || edad == -1) {
-            //std::cout << "No se ha proporcionado un ID ni edad/nombre, por favor ingrese los siguientes datos para la búsqueda:\n";
             std::cout << "Ingrese la edad del paciente: ";
             std::cin >> edad;
             std::cin.ignore();  // Limpiar el buffer de entrada
@@ -87,29 +88,48 @@ void gestionarPacientes(int operacion, std::string db_pacientes, int id, int eda
             return;  // Si no se encuentra, terminamos la función
         }
     }
-
+    // A partir de aquí, ya tenemos el id y no necesitamos pedirlo nuevamente
     switch (operacion) {
         case 1: {  // Alta/Baja
-            int id;
-            std::cout << "Ingrese el ID del paciente a dar de alta/baja: ";
-            std::cin >> id;
-            Paciente paciente = buscarPaciente(id, pacientes);
-            paciente.mostrarInfo();  // Mostrar la información del paciente
+            try {
+                auto it = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
+                    return p.getId() == id;
+                });
+
+                if (it != pacientes.end()) {
+                    int nuevaDisponibilidad;
+                    std::cout << "¿Desea dar de alta (1) o de baja (0) al paciente? ";
+                    std::cin >> nuevaDisponibilidad;
+
+                    // Validar si ya está en el estado solicitado
+                    if (it->getDisponibilidad() == nuevaDisponibilidad) {
+                        std::cout << it->getNombre() 
+                                << " ya está " << (nuevaDisponibilidad == 1 ? "de alta" : "de baja") 
+                                << ".\n";
+                    } else {
+                        it->setDisponibilidad(nuevaDisponibilidad);  // Actualizar disponibilidad
+                        std::cout << it->getNombre() 
+                                << " ha sido dado " << (nuevaDisponibilidad == 1 ? "de alta" : "de baja") 
+                                << " correctamente.\n";
+
+                        // Solo guardar los cambios una vez
+                        guardarPacientes("db/pacientes.csv", pacientes);
+                    }
+                } else {
+                    throw std::runtime_error("Paciente no encontrado para realizar la operación.");
+                }
+            } catch (const std::runtime_error& e) {
+                std::cerr << e.what() << std::endl;
+            }
             break;
         }
         case 2: {  // Modificar Datos
-            int id;
-            std::cout << "Ingrese el ID del paciente a modificar: ";
-            std::cin >> id;
             Paciente paciente = buscarPaciente(id, pacientes);
             paciente.mostrarInfo();  // Mostrar la información del paciente
             // Lógica para modificar datos
             break;
         }
         case 3: {  // Realizar Busqueda
-            int id;
-            std::cout << "Ingrese el ID del paciente a buscar: ";
-            std::cin >> id;
             try {
                 Paciente paciente = buscarPaciente(id, pacientes);
                 paciente.mostrarInfo();
@@ -119,9 +139,6 @@ void gestionarPacientes(int operacion, std::string db_pacientes, int id, int eda
             break;
         }
         case 4: {  // Historial Clínico
-            int id;
-            std::cout << "Ingrese el ID del paciente para agregar historial: ";
-            std::cin >> id;
             std::string registro;
             std::cout << "Ingrese el registro para el historial clínico: ";
             std::cin.ignore();
@@ -134,6 +151,7 @@ void gestionarPacientes(int operacion, std::string db_pacientes, int id, int eda
             break;
     }
 }
+
 
 
 
@@ -226,8 +244,9 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::YELLOW << "\n\n Operacion => ";
             std::cin >> operacion;
 
-            gestionarPacientes(operacion, db_pacientes, -1, -1, "");  // Función para gestionar pacientes
+            gestionarPacientes(operacion, -1, -1, "");  // Función para gestionar pacientes
             break;
+
         case 2:
             std::cout << bcolors::BLUEL << "\n1. Manejar el Alta/Baja";
             std::cout << bcolors::BLUEL << "\n2. Asignar Especialidad";

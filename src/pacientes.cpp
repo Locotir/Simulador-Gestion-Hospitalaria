@@ -59,6 +59,8 @@ std::vector<Paciente> cargarPacientes(const std::string& filename) {
     }
 
     std::string linea;
+    std::getline(file, linea);  // Saltar la primera línea (encabezado)
+
     while (std::getline(file, linea)) {
         std::stringstream ss(linea);
         std::string token;
@@ -66,15 +68,25 @@ std::vector<Paciente> cargarPacientes(const std::string& filename) {
         int id, edad, disponibilidad;
         std::string nombre, fechaIngreso;
 
+        // Leer ID
         std::getline(ss, token, ',');
-        id = std::stoi(token);
-        std::getline(ss, nombre, ',');
-        std::getline(ss, token, ',');
-        edad = std::stoi(token);
-        std::getline(ss, fechaIngreso, ',');
-        std::getline(ss, token, ',');
-        disponibilidad = std::stoi(token);
+        id = std::stoi(token);  // Convertir a int
 
+        // Leer nombre
+        std::getline(ss, nombre, ',');
+
+        // Leer edad
+        std::getline(ss, token, ',');
+        edad = std::stoi(token);  // Convertir a int
+
+        // Leer fecha de ingreso
+        std::getline(ss, fechaIngreso, ',');
+
+        // Leer disponibilidad (debe ser 0 o 1)
+        std::getline(ss, token, ',');
+        disponibilidad = std::stoi(token);  // Convertir a int (0 o 1)
+
+        // Crear paciente y agregarlo al vector
         pacientes.emplace_back(id, nombre, edad, fechaIngreso, disponibilidad);
     }
 
@@ -88,6 +100,9 @@ void guardarPacientes(const std::string& filename, const std::vector<Paciente>& 
         throw std::runtime_error("Error al abrir el archivo para guardar pacientes.");
     }
 
+    // Agregar encabezado
+    file << "ID,nombre,edad,fechaIngreso,disponibilidad\n";
+
     for (const auto& paciente : pacientes) {
         file << paciente.getId() << "," 
              << paciente.getNombre() << ","
@@ -96,6 +111,7 @@ void guardarPacientes(const std::string& filename, const std::vector<Paciente>& 
              << paciente.getDisponibilidad() << "\n";
     }
 }
+
 
 // Función para dar de alta un paciente
 void darDeAlta(int id, std::vector<Paciente>& pacientes) {
