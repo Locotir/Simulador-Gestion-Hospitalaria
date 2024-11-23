@@ -4,15 +4,21 @@ CXX = g++
 # Flags de compilación
 CXXFLAGS = -Wall -Wextra -pedantic -std=c++17 -g
 
+# Directorio fuente
+SRC_DIR = src
+
 # Archivos de cabecera y fuente
-HEADERS = archivos.hpp citas.hpp medicos.hpp pacientes.hpp reportes.hpp
-SOURCES = main.cpp archivos.cpp citas.cpp medicos.cpp pacientes.cpp reportes.cpp
+HEADERS = $(wildcard $(SRC_DIR)/*.hpp)
+SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
+
+# Directorio de objetos intermedios
+BUILD_DIR = build
+
+# Archivos de objetos intermedios
+OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 # Nombre del ejecutable
 EXEC = SGH
-
-# Objetos intermedios
-OBJECTS = $(SOURCES:.cpp=.o)
 
 # Regla principal (default)
 all: $(EXEC)
@@ -22,12 +28,13 @@ $(EXEC): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # Regla para compilar cada archivo .cpp a .o
-%.o: %.cpp $(HEADERS)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS)
+	@mkdir -p $(BUILD_DIR)  # Crear el directorio build si no existe
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Limpiar archivos generados
 clean:
-	rm -f $(OBJECTS) $(EXEC)
+	rm -rf $(BUILD_DIR) $(EXEC)
 
 # Phony targets (no generan archivos)
 .PHONY: all clean
