@@ -1,3 +1,4 @@
+#include "main.hpp" //bcolors
 #include "pacientes.hpp"
 #include <iostream>
 #include <fstream>
@@ -12,9 +13,9 @@ Paciente::Paciente(int id, const std::string& nombre, int edad, const std::strin
 
 // Mostrar la informacion del paciente
 void Paciente::mostrarInfo() const {
-    std::cout << "ID: " << id << "\nNombre: " << nombre << "\nEdad: " << edad 
-              << "\nFecha de Ingreso: " << fechaIngreso << "\nDisponibilidad: " 
-              << (disponibilidad == 1 ? "Dado de alta" : "Dado de baja") << std::endl;
+    std::cout << bcolors::ORANGE << "\nID: " << bcolors::RESET << id << bcolors::ORANGE << "\nNombre: " << bcolors::RESET << nombre << bcolors::ORANGE << "\nEdad: " << bcolors::RESET << edad 
+              << bcolors::ORANGE << "\nFecha de Ingreso: " << bcolors::RESET << fechaIngreso << bcolors::ORANGE << "\nDisponibilidad: " 
+              << bcolors::WHITE << (disponibilidad == 1 ? "Dado de alta" : "Dado de baja") << std::endl;
 }
 
 int Paciente::getEdad() const {
