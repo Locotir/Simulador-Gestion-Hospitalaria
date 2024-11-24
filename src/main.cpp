@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <filesystem>
 
-
+#include "main.hpp" // Bcolors
 #include "pacientes.hpp"
 #include "medicos.hpp"
 #include "citas.hpp"
@@ -25,50 +25,31 @@ const std::string db_medicos = "db/medicos.csv";
 const std::string db_citas = "db/citas.csv";
 const std::string db_historialClinico = "db/historial-clinico.csv";
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++ Clase de Codigos de Color ++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-class bcolors {
-public:
-    static const std::string PURPLE;
-    static const std::string BLUE;
-    static const std::string BLUEL;
-    static const std::string GREEN;
-    static const std::string YELLOW;
-    static const std::string RED;
-    static const std::string UNDERLINE;
-    static const std::string WHITE;
-    static const std::string ORANGE;
-    static const std::string VIOLET;
-    static const std::string BLACK; 
-};
-
 const std::string bcolors::PURPLE = "\033[95m";
-const std::string bcolors::BLUE = "\033[94m";   
-const std::string bcolors::BLUEL = "\033[96m";  
-const std::string bcolors::GREEN = "\033[92m";  
-const std::string bcolors::YELLOW = "\033[93m"; 
-const std::string bcolors::RED = "\033[91m";    
-const std::string bcolors::UNDERLINE = "\033[4m"; 
-const std::string bcolors::WHITE = "\033[37m";   
-const std::string bcolors::ORANGE = "\033[38;5;208m"; 
+const std::string bcolors::BLUE = "\033[94m";
+const std::string bcolors::BLUEL = "\033[96m";
+const std::string bcolors::GREEN = "\033[92m";
+const std::string bcolors::YELLOW = "\033[93m";
+const std::string bcolors::RED = "\033[91m";
+const std::string bcolors::UNDERLINE = "\033[4m";
+const std::string bcolors::WHITE = "\033[37m";
+const std::string bcolors::ORANGE = "\033[38;5;208m";
 const std::string bcolors::VIOLET = "\033[38;5;135m";
-const std::string bcolors::BLACK = "\033[30m";   
-const std::string RESET = "\033[0m";
-
-
+const std::string bcolors::BLACK = "\033[30m";
+const std::string bcolors::RESET = "\033[0m";
 
 void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
-    std::cout << "1";
+
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes);
-    std::cout << "Debug: id = " << id << ", edad = " << edad << ", nombre = " << nombre << std::endl;
     
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
     if (id == -1) {
         // Si no se tienen nombre y edad, pedimos los datos al usuario
         if (nombre.empty() || edad == -1) {
-            std::cout << "Ingrese la edad del paciente: ";
+            std::cout << "\nIngrese la edad del paciente: " << bcolors::GREEN;
             std::cin >> edad;
             std::cin.ignore();  // Limpiar el buffer de entrada
-            std::cout << "Ingrese el nombre del paciente: ";
+            std::cout << bcolors::YELLOW << "Ingrese el nombre del paciente: " << bcolors::GREEN;
             std::getline(std::cin, nombre);
         }
 
@@ -98,7 +79,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
 
                 if (it != pacientes.end()) {
                     int nuevaDisponibilidad;
-                    std::cout << "¿Desea dar de alta (1) o de baja (0) al paciente? ";
+                    std::cout << "\n¿Desea dar de alta (1) o de baja (0) al paciente? ";
                     std::cin >> nuevaDisponibilidad;
 
                     // Validar si ya está en el estado solicitado
@@ -108,7 +89,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
                                 << ".\n";
                     } else {
                         it->setDisponibilidad(nuevaDisponibilidad);  // Actualizar disponibilidad
-                        std::cout << it->getNombre() 
+                        std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << it->getNombre() 
                                 << " ha sido dado " << (nuevaDisponibilidad == 1 ? "de alta" : "de baja") 
                                 << " correctamente.\n";
 
@@ -225,14 +206,14 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
      / / __/ _ \/ ___/ __/ / __ \/ __ \   / /_/ / __ \/ ___/ __ \/ / __/ __ `/ / __ `/ ___/ / __ `/
     / /_/ /  __(__  ) /_/ / /_/ / / / /  / __  / /_/ (__  ) /_/ / / /_/ /_/ / / /_/ / /  / / /_/ / 
     \____/\___/____/\__/_/\____/_/ /_/  /_/ /_/\____/____/ .___/_/\__/\__,_/_/\__,_/_/  /_/\__,_/  
-    )" << RESET << std::endl;
+    )" << bcolors::RESET << std::endl;
 
     // Mostrar Opciones
-    std::cout << bcolors::GREEN <<  "\n1. Gestionar Pacientes" << RESET << std::endl;
-    std::cout << bcolors::BLUEL <<  "\n2. Gestionar Medicos" << RESET << std::endl;
-    std::cout << bcolors::RED <<    "\n3. Gestionar Citas Medicas" << RESET << std::endl;
-    std::cout << bcolors::PURPLE << "\n4. Realizar Backup" << RESET << std::endl;
-    std::cout << bcolors::YELLOW << "\n\n Opcion => ";
+    std::cout << bcolors::GREEN <<  "\n1. Gestionar Pacientes" << bcolors::RESET << std::endl;
+    std::cout << bcolors::BLUEL <<  "\n2. Gestionar Medicos" << bcolors::RESET << std::endl;
+    std::cout << bcolors::RED <<    "\n3. Gestionar Citas Medicas" << bcolors::RESET << std::endl;
+    std::cout << bcolors::PURPLE << "\n4. Realizar Backup" << bcolors::RESET << std::endl;
+    std::cout << bcolors::YELLOW << "\n\n Opcion => " << bcolors::RESET << std::endl;
     std::cin >> opcion;
 
     switch (opcion) {
@@ -241,7 +222,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::GREEN << "\n2. Modificar Datos";
             std::cout << bcolors::GREEN << "\n3. Realizar Busqueda";
             std::cout << bcolors::GREEN << "\n4. Historial Clinico";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => ";
+            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
             std::cin >> operacion;
 
             gestionarPacientes(operacion, -1, -1, "");  // Función para gestionar pacientes
@@ -251,7 +232,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::BLUEL << "\n1. Manejar el Alta/Baja";
             std::cout << bcolors::BLUEL << "\n2. Asignar Especialidad";
             std::cout << bcolors::BLUEL << "\n3. Listar * Especialidad/Disponibilidad";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => ";
+            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
             std::cin >> operacion;
             //gestionarMedicos();    // Función para gestionar medicos
             break;
@@ -260,15 +241,15 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::RED << "\n2. Ordenar Citas * Fecha/Urgencia";
             std::cout << bcolors::RED << "\n3. Registro de Citas";
             std::cout << bcolors::RED << "\n4. Cancelar/Modificar cita";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => ";
+            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
             std::cin >> operacion;
-            //gestionarCitas(operacion);      // Función para gestionar citas
+            //gestionarCitas(operacion);      // Funcion para gestionar citas
             break;
         case 4:
             realizarBackup();      // Función para realizar backup
             break;
         default:
-            std::cout << bcolors::RED << "Opción inválida!" << std::endl;
+            std::cout << bcolors::RED << "Opción inválida!" << std::endl << std::endl;
             showHelp();
         
             return 1;
@@ -277,7 +258,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     } else { // Ejecutar argumentos en CLI
         std::cout << "Argumento recibido: " << argv[1] << std::endl;  // Mostrar el primer argumento
 
-        // Ejemplo de cómo procesar más de un argumento
+        // Ejemplo de cómo procesar mas de un argumento
         if (argc > 2) {
             std::cout << "Argumentos adicionales: ";
             for (int i = 2; i < argc; ++i) {
