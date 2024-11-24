@@ -24,7 +24,7 @@ const std::string db_pacientes = "db/pacientes.csv";
 const std::string db_medicos = "db/medicos.csv";
 const std::string db_citas = "db/citas.csv";
 const std::string db_historialClinico = "db/historial-clinico.csv";
-
+// Bcolors
 const std::string bcolors::PURPLE = "\033[95m";
 const std::string bcolors::BLUE = "\033[94m";
 const std::string bcolors::BLUEL = "\033[96m";
@@ -38,15 +38,14 @@ const std::string bcolors::VIOLET = "\033[38;5;135m";
 const std::string bcolors::BLACK = "\033[30m";
 const std::string bcolors::RESET = "\033[0m";
 
-void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
-
+void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int nuevaDisponibilidad = -1) {
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes);
-    
+
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
     if (id == -1) {
         // Si no se tienen nombre y edad, pedimos los datos al usuario
         if (nombre.empty() || edad == -1) {
-            std::cout << "\nIngrese la edad del paciente: " << bcolors::GREEN;
+            std::cout << bcolors::YELLOW << "\nIngrese la edad del paciente: " << bcolors::GREEN;
             std::cin >> edad;
             std::cin.ignore();  // Limpiar el buffer de entrada
             std::cout << bcolors::YELLOW << "Ingrese el nombre del paciente: " << bcolors::GREEN;
@@ -78,9 +77,11 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
                 });
 
                 if (it != pacientes.end()) {
-                    int nuevaDisponibilidad;
-                    std::cout << "\n¿Desea dar de alta (1) o de baja (0) al paciente? ";
-                    std::cin >> nuevaDisponibilidad;
+                    // Si se especifico nuevaDisponibilidad, se usa; de lo contrario, pedimos la entrada
+                    if (nuevaDisponibilidad == -1) {
+                        std::cout << "\n¿Desea dar de alta (1) o de baja (0) al paciente? ";
+                        std::cin >> nuevaDisponibilidad;
+                    }
 
                     // Validar si ya está en el estado solicitado
                     if (it->getDisponibilidad() == nuevaDisponibilidad) {
@@ -135,17 +136,9 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre) {
 
 
 
-
-
 void realizarBackup() {
     // Directorio donde se encuentran los archivos CSV
     fs::path dir = "./db";  
-
-    // Comprobar si el directorio existe
-    if (!fs::exists(dir) || !fs::is_directory(dir)) {
-        std::cerr << "El directorio no existe o no es válido." << std::endl;
-        return;
-    }
 
     // Iterar sobre los archivos en el directorio
     for (const auto& entry : fs::directory_iterator(dir)) {
@@ -155,22 +148,14 @@ void realizarBackup() {
 
             // Abrir archivo original
             std::ifstream src(originalPath, std::ios::binary);
-            if (!src) {
-                std::cerr << "No se pudo abrir el archivo: " << originalPath << std::endl;
-                continue;
-            }
 
             // Crear archivo de backup
             std::ofstream dst(backupPath, std::ios::binary);
-            if (!dst) {
-                std::cerr << "No se pudo crear el archivo de backup: " << backupPath << std::endl;
-                continue;
-            }
 
             // Copiar contenido del archivo original al de backup
             dst << src.rdbuf();
 
-            std::cout << "Backup creado para: " << originalPath << " -> " << backupPath << std::endl;
+            std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << "Backup creado para: " << originalPath << " -> " << backupPath << std::endl;
         }
     }
 }
@@ -184,15 +169,21 @@ void signalHandler([[maybe_unused]] int signum) {
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Mostrar Mensaje de Ayuda +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void showHelp() {
-    std::cout << "Uso: ./SGH [opciones]\n"
+    std::cout << "\nUso: ./SGH [opciones]\n"
               << "Opciones:\n"
-              << "  -X <buscar>       Buscar algo\n"
-              << "  -h                Mostrar este mensaje\n"
+              << "  --gestionar     <pacientes,medicos,citas>       Area de enfoque.\n"
+              << "      -id          <id>                            Identificador del individuo.\n"
+              << "      -N           'Nombre Apellido1 Apellido2'    Nombre del individuo.\n"
+              << "      -E           <edad>                          Edad del individuo.\n"
+              << "  --backup        <realizar backup>               Realizar una copia de seguridad de los datos.\n"
+              << "  -h               Mostrar este mensaje\n"
               << "Ejemplos:\n"
-              << "  ./SGH [ejemplo]\n"
-              << "  ./SGH [otro_ejemplo]\n\n" 
-              << bcolors::GREEN << "Si se ejecuta sin argumentos, el modo interactivo empezara." << std::endl;
-} 
+              << "  ./SGH --gestionar pacientes -N 'Nombre Apellido1 Apellido2' -E 19 -alta\n"
+              << "  ./SGH --backup\n\n"
+              << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
+              << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
+}
+
 
 int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     std::signal(SIGINT, signalHandler); // Interceptar CTL + C
@@ -213,7 +204,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     std::cout << bcolors::BLUEL <<  "\n2. Gestionar Medicos" << bcolors::RESET << std::endl;
     std::cout << bcolors::RED <<    "\n3. Gestionar Citas Medicas" << bcolors::RESET << std::endl;
     std::cout << bcolors::PURPLE << "\n4. Realizar Backup" << bcolors::RESET << std::endl;
-    std::cout << bcolors::YELLOW << "\n\n Opcion => " << bcolors::RESET << std::endl;
+    std::cout << bcolors::YELLOW << "\n\n Opcion => " << bcolors::WHITE;
     std::cin >> opcion;
 
     switch (opcion) {
@@ -225,7 +216,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
             std::cin >> operacion;
 
-            gestionarPacientes(operacion, -1, -1, "");  // Función para gestionar pacientes
+            gestionarPacientes(operacion, -1, -1, "", -1);  // Función para gestionar pacientes
             break;
 
         case 2:
@@ -256,15 +247,61 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     }
 
     } else { // Ejecutar argumentos en CLI
-        std::cout << "Argumento recibido: " << argv[1] << std::endl;  // Mostrar el primer argumento
+        int operacion;
+        int id = -1;
+        std::string nombre = "";
+        int edad = -1;
+        int nuevaDisponibilidad = -1;
 
-        // Ejemplo de cómo procesar mas de un argumento
-        if (argc > 2) {
-            std::cout << "Argumentos adicionales: ";
-            for (int i = 2; i < argc; ++i) {
-                std::cout << argv[i] << " ";
+        for (int i = 1; i < argc; i++) {
+
+            if (strcmp(argv[i], "--backup") == 0) {
+                realizarBackup();
+                return 0;  // Salimos del programa despues de hacer el backup
             }
-            std::cout << std::endl;
+            if (strcmp(argv[i], "--gestionar") == 0) {
+                if (i + 1 < argc) {
+                    if (strcmp(argv[i + 1], "pacientes") == 0) {
+                        operacion = 1;  // Gestionar pacientes
+                    } else if (strcmp(argv[i + 1], "medicos") == 0) {
+                        operacion = 2;  // Gestionar médicos
+                    } else if (strcmp(argv[i + 1], "citas") == 0) {
+                        operacion = 3;  // Gestionar citas
+                    }
+                    i++; // Avanzar el indice
+                }
+            } 
+            else if (strcmp(argv[i], "-N") == 0 && i + 1 < argc) {
+                nombre = argv[i + 1]; 
+                i++;
+            }
+            else if (strcmp(argv[i], "-E") == 0 && i + 1 < argc) {
+                edad = std::atoi(argv[i + 1]); 
+                i++;
+            }
+            else if (strcmp(argv[i], "-id") == 0 && i + 1 < argc) {
+                id = std::atoi(argv[i + 1]); 
+                i++;
+            }            
+            else if (strcmp(argv[i], "-alta") == 0) {
+                nuevaDisponibilidad = 1;  // Alta
+            }
+            else if (strcmp(argv[i], "-baja") == 0) {
+                nuevaDisponibilidad = 0;  // Baja
+            }
+            else if (strcmp(argv[i], "-h") == 0) {
+                showHelp(); 
+                return 0;
+            }
+            else {
+                std::cout << bcolors::RED << "\n!!!Argumento desconocido: " << argv[i] << bcolors::YELLOW << std::endl;
+                showHelp();
+                return 1;
+            }
+        }
+
+        if (operacion == 1) {
+            gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad);  // Operación pacientes
         }
     }
 
