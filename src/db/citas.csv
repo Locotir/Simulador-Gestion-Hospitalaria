@@ -1,2 +1,13 @@
 ID,nombrePaciente,nombreMedico,fecha,descripcion
-0,Marcos Garcia Zorin,Miguel Buges,Revision Basica
+0,Marcos Garcia Zorin,Luis Torres Martín,15-11-2024,Revisión Básica
+1,Antonio Gallardo Domingo,Ana Gómez Sánchez,18-11-2024,Consulta de Seguimiento
+2,Sofía Martínez López,Carlos Ramírez López,20-11-2024,Evaluación de Manchas Cutáneas
+3,Carlos Fernández Pérez,María Fernández Pérez,22-11-2024,Diagnóstico de Migrañas
+4,Lucía Gómez Sánchez,Andrés Jiménez García,25-11-2024,Control de Fractura
+5,Andrés Ramírez Torres,Elena Ortega Ruiz,27-11-2024,Examen Preventivo
+6,María Jiménez Castro,Roberto Vargas León,30-11-2024,Consulta por Dolor Crónico
+7,Javier Ortega Ruiz,Clara Prieto Gil,02-12-2024,Chequeo de Tiroides
+8,Elena Vargas Prieto,José López Martínez,04-12-2024,Consulta Oncológica
+9,Diego Hernández Gil,Lucía Sánchez Torres,07-12-2024,Revisión de Oído
+10,Carmen Moreno León,Diego Hernández Castro,10-12-2024,Evaluación Psicológica
+
