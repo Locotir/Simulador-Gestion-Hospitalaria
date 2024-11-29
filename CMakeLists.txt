@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Flags de compilación
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -g")
 
+# Asegurarse de que la entrada y salida estén en UTF-8
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finput-charset=UTF-8 -fexec-charset=UTF-8")
+
 # Directorios fuente y de cabecera
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 file(GLOB SOURCES ${SRC_DIR}/*.cpp)
@@ -28,8 +31,12 @@ add_custom_command(
     COMMENT "Copiando carpeta db al directorio de salida..."
 )
 
+# Asegurarse de que el entorno de ejecución use UTF-8 (opcional)
+# Esto configura la localización para que el programa maneje UTF-8 correctamente
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUTF8_SUPPORT")
+
 
 #       INSTRUCCIONES
-
+# Crear el directorio build: mkdir build
 # Construir el proyecto: cd build -> cmake .. 
 # Luego con make compilarlo: make  
