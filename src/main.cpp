@@ -126,7 +126,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
                 std::cout << "  1: Nombre\n";
                 std::cout << "  2: Edad\n";
                 std::cout << "  3: Disponibilidad\n";
-                std::cout << "Operación => " << bcolors::WHITE;
+                std::cout << "Operación ➟ " << bcolors::WHITE;
                 std::cin >> aModificar;
                 std::cin.ignore();  // Limpiar el buffer de entrada
             }
@@ -292,39 +292,39 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     )" << bcolors::RESET << std::endl;
 
     // Mostrar Opciones
-    std::cout << bcolors::GREEN <<  "\n1. Gestionar Pacientes" << bcolors::RESET << std::endl;
-    std::cout << bcolors::BLUEL <<  "\n2. Gestionar Medicos" << bcolors::RESET << std::endl;
-    std::cout << bcolors::RED <<    "\n3. Gestionar Citas Medicas" << bcolors::RESET << std::endl;
-    std::cout << bcolors::PURPLE << "\n4. Realizar Backup" << bcolors::RESET << std::endl;
-    std::cout << bcolors::YELLOW << "\n\n Opcion => " << bcolors::WHITE;
+    std::cout << bcolors::GREEN <<  "\n1. 🧑 Gestionar Pacientes" << bcolors::RESET << std::endl;
+    std::cout << bcolors::BLUEL <<  "\n2. 👨‍⚕️Gestionar Médicos" << bcolors::RESET << std::endl;
+    std::cout << bcolors::RED <<    "\n3. 🗎  Gestionar Citas Médicas" << bcolors::RESET << std::endl;
+    std::cout << bcolors::PURPLE << "\n4. ⎗  Realizar Backup" << bcolors::RESET << std::endl;
+    std::cout << bcolors::YELLOW << "\n\n ▶ Opción ➟ " << bcolors::WHITE;
     std::cin >> opcion;
 
     switch (opcion) {
         case 1:
-            std::cout << bcolors::GREEN << "\n1. Manejar el Alta/Baja";
-            std::cout << bcolors::GREEN << "\n2. Modificar Datos";
-            std::cout << bcolors::GREEN << "\n3. Realizar Busqueda";
-            std::cout << bcolors::GREEN << "\n4. Historial Clinico";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
+            std::cout << bcolors::GREEN << "\n1. ⭥  Manejar el Alta/Baja";
+            std::cout << bcolors::GREEN << "\n2. 📝 Modificar Datos";
+            std::cout << bcolors::GREEN << "\n3. 🔎 Realizar Busqueda";
+            std::cout << bcolors::GREEN << "\n4. 🗎  Historial Clinico";
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
             std::cin >> operacion;
 
             gestionarPacientes(operacion, -1, -1, "", -1, -1, "");  // Función para gestionar pacientes
             break;
 
         case 2:
-            std::cout << bcolors::BLUEL << "\n1. Manejar el Alta/Baja";
-            std::cout << bcolors::BLUEL << "\n2. Asignar Especialidad";
-            std::cout << bcolors::BLUEL << "\n3. Listar * Especialidad/Disponibilidad";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
+            std::cout << bcolors::BLUEL << "\n1. ⭥  Manejar el Alta/Baja";
+            std::cout << bcolors::BLUEL << "\n2. ⚕️ Asignar Especialidad";
+            std::cout << bcolors::BLUEL << "\n3. 🗎  Listar * Especialidad/Disponibilidad";
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
             std::cin >> operacion;
             //gestionarMedicos();    // Función para gestionar medicos
             break;
         case 3:
-            std::cout << bcolors::RED << "\n1. Asignar Cita";
-            std::cout << bcolors::RED << "\n2. Ordenar Citas * Fecha/Urgencia";
-            std::cout << bcolors::RED << "\n3. Registro de Citas";
-            std::cout << bcolors::RED << "\n4. Cancelar/Modificar cita";
-            std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
+            std::cout << bcolors::RED << "\n1. 🗓️ Asignar Cita";
+            std::cout << bcolors::RED << "\n2. 📅 Ordenar Citas * Fecha/Urgencia";
+            std::cout << bcolors::RED << "\n3. 🗎  Registro de Citas";
+            std::cout << bcolors::RED << "\n4. 📝 Cancelar/Modificar cita";
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
             std::cin >> operacion;
             //gestionarCitas(operacion);      // Funcion para gestionar citas
             break;
