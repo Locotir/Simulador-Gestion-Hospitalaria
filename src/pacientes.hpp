@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>  // Necesario para std::runtime_error
 #include "citas.hpp"  // Acceder a la clase Cita
 
 // Clase Paciente que contiene la información de un paciente.
@@ -46,6 +47,9 @@ std::vector<Paciente> cargarPacientes(const std::string& filename);
 void guardarPacientes(const std::string& filename, const std::vector<Paciente>& pacientes);
 void eliminarPaciente(int id, std::vector<Paciente>& pacientes);
 Paciente buscarPaciente(int id, const std::vector<Paciente>& pacientes);
+
+// Función para modificar los datos de un paciente
+void modificarPaciente(int id, std::vector<Paciente>& pacientes, const std::string& nuevoNombre, int nuevaEdad, int nuevaDisponibilidad);
 
 // Funciones para gestionar citas
 std::vector<Cita> cargarCitas(const std::string& filename);

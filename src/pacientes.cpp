@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <locale>  
 
 // Constructor de Paciente
 Paciente::Paciente(int id, const std::string& nombre, int edad, const std::string& fechaIngreso, int disponibilidad)
@@ -69,26 +70,32 @@ std::vector<Paciente> cargarPacientes(const std::string& filename) {
         int id, edad, disponibilidad;
         std::string nombre, fechaIngreso;
 
-        // Leer ID
-        std::getline(ss, token, ',');
-        id = std::stoi(token);  // Convertir a int
+        try {
+            // Leer ID
+            std::getline(ss, token, ',');
+            id = std::stoi(token);  // Convertir a int
 
-        // Leer nombre
-        std::getline(ss, nombre, ',');
+            // Leer nombre
+            std::getline(ss, nombre, ',');
 
-        // Leer edad
-        std::getline(ss, token, ',');
-        edad = std::stoi(token);  // Convertir a int
+            // Leer edad
+            std::getline(ss, token, ',');
+            edad = std::stoi(token);  // Convertir a int
 
-        // Leer fecha de ingreso
-        std::getline(ss, fechaIngreso, ',');
+            // Leer fecha de ingreso
+            std::getline(ss, fechaIngreso, ',');
 
-        // Leer disponibilidad (debe ser 0 o 1)
-        std::getline(ss, token, ',');
-        disponibilidad = std::stoi(token);  // Convertir a int (0 o 1)
+            // Leer disponibilidad (debe ser 0 o 1)
+            std::getline(ss, token, ',');
+            disponibilidad = std::stoi(token);  // Convertir a int (0 o 1)
 
-        // Crear paciente y agregarlo al vector
-        pacientes.emplace_back(id, nombre, edad, fechaIngreso, disponibilidad);
+            // Crear paciente y agregarlo al vector
+            pacientes.emplace_back(id, nombre, edad, fechaIngreso, disponibilidad);
+        } catch (const std::invalid_argument& e) {
+            // No hacer nada en caso de error de conversión
+        } catch (const std::out_of_range& e) {
+            // No hacer nada en caso de número fuera de rango
+        }
     }
 
     return pacientes;
