@@ -10,6 +10,10 @@
 #include <stdexcept>
 #include <filesystem>
 
+#ifdef UTF8_SUPPORT
+#include <locale>  // Necesario para setlocale
+#endif
+
 #include "main.hpp" // Bcolors
 #include "pacientes.hpp"
 #include "medicos.hpp"
@@ -38,7 +42,8 @@ const std::string bcolors::VIOLET = "\033[38;5;135m";
 const std::string bcolors::BLACK = "\033[30m";
 const std::string bcolors::RESET = "\033[0m";
 
-void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int nuevaDisponibilidad = -1) {
+void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int nuevaDisponibilidad, int aModificar, std::string modificado) {
+    try {
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes);
 
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
@@ -48,7 +53,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             std::cout << bcolors::YELLOW << "\nIngrese la edad del paciente: " << bcolors::GREEN;
             std::cin >> edad;
             std::cin.ignore();  // Limpiar el buffer de entrada
-            std::cout << bcolors::YELLOW << "Ingrese el nombre del paciente: " << bcolors::GREEN;
+            std::cout << bcolors::YELLOW << "\nIngrese el nombre del paciente: " << bcolors::GREEN;
             std::getline(std::cin, nombre);
         }
 
@@ -106,9 +111,87 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             break;
         }
         case 2: {  // Modificar Datos
-            Paciente paciente = buscarPaciente(id, pacientes);
-            paciente.mostrarInfo();  // Mostrar la información del paciente
-            // Lógica para modificar datos
+            int disponibilidad;
+            auto it = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
+                return p.getId() == id;
+            });
+
+            if (it != pacientes.end()) {
+                disponibilidad = it->getDisponibilidad();  // Copia el valor de disponibilidad
+            }
+
+            if (aModificar == -1) {
+                // Modo menú: Pedimos al usuario qué desea modificar
+                std::cout << bcolors::YELLOW << "\n¿Qué desea modificar?\n";
+                std::cout << "  1: Nombre\n";
+                std::cout << "  2: Edad\n";
+                std::cout << "  3: Disponibilidad\n";
+                std::cout << "Operación => " << bcolors::WHITE;
+                std::cin >> aModificar;
+                std::cin.ignore();  // Limpiar el buffer de entrada
+            }
+    
+            if (aModificar == 1) {
+                // Modificar Nombre
+                if (modificado.empty()) {
+                    std::cout << bcolors::YELLOW << "Nombre actual: " << bcolors::WHITE << nombre << "\n";
+                    std::cout << bcolors::ORANGE << "Ingrese el nuevo nombre: " << bcolors::WHITE;
+                    std::getline(std::cin, modificado);  // Nuevo nombre
+                }
+                modificarPaciente(id, pacientes, modificado, edad, disponibilidad);
+            }else if (aModificar == 2) {
+                // Modificar Edad
+                if (modificado.empty()) {
+                    std::cout << bcolors::YELLOW << "Edad actual: " << bcolors::WHITE << edad << "\n";
+                    std::cout << bcolors::ORANGE << "Ingrese la nueva edad: " << bcolors::WHITE;
+                    std::getline(std::cin, modificado);  // Leer la nueva edad como texto
+                }
+                // Convertir el texto a int
+                int nuevaEdad;
+                try {
+                    nuevaEdad = std::stoi(modificado);  // Convertir la edad de texto a int
+                } catch (const std::invalid_argument& e) {
+                    std::cout << bcolors::RED << "La edad ingresada no es válida. Debe ser un número.\n";
+                    return;  // Salir de la función si la conversión falla
+                } catch (const std::out_of_range& e) {
+                    std::cout << bcolors::RED << "El número ingresado está fuera del rango válido.\n";
+                    return;  // Salir de la función si el número está fuera de rango
+                }
+
+                // Ahora pasamos la edad convertida a la función de modificar
+                modificarPaciente(id, pacientes, nombre, nuevaEdad, disponibilidad);
+
+            }else if (aModificar == 3) {
+                // Modificar Disponibilidad
+                if (modificado.empty()) {
+                    std::cout << bcolors::YELLOW << "Disponibilidad actual: " << bcolors::WHITE << (disponibilidad == 1 ? "Alta" : "Baja") << "\n";
+                    std::cout << bcolors::ORANGE << "Ingrese la nueva disponibilidad (1 para alta, 0 para baja): " << bcolors::WHITE;
+                    std::cin >> modificado;
+                    std::cin.ignore();  // Limpiar el buffer de entrada
+                }
+
+                // Validar la entrada antes de convertirla
+                if (modificado != "0" && modificado != "1") {
+                    std::cout << bcolors::RED << "Valor inválido. Solo se permite 1 (alta) o 0 (baja).\n";
+                    return;
+                }
+
+                int nuevaDisponibilidad = std::stoi(modificado);  // Ahora es seguro convertir
+                modificarPaciente(id, pacientes, nombre, edad, nuevaDisponibilidad);
+            } else {
+                std::cout << bcolors::RED << "Opción no válida.\n";
+            }
+
+            // Guardar cambios
+            guardarPacientes("db/pacientes.csv", pacientes);
+            std::cout << bcolors::BLUEL << "\nNuevos Datos Modificados:↴";
+            // Aquí mostramos la información actualizada del paciente
+            auto itMod = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
+                return p.getId() == id;
+            });
+            if (itMod != pacientes.end()) {
+                itMod->mostrarInfo();  // Mostrar los datos del paciente modificado
+            }
             break;
         }
         case 3: {  // Realizar Busqueda
@@ -131,6 +214,9 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
         default:
             std::cout << "Opción no válida." << std::endl;
             break;
+    }
+    } catch (const std::exception& e) {
+        std::cerr << bcolors::RED << "Se produjo un error: " << e.what() << bcolors::WHITE << std::endl;
     }
 }
 
@@ -175,10 +261,14 @@ void showHelp() {
               << "      -id          <id>                            Identificador del individuo.\n"
               << "      -N           'Nombre Apellido1 Apellido2'    Nombre del individuo.\n"
               << "      -E           <edad>                          Edad del individuo.\n"
+              << "      -alta         <dar de alta>                  Dar de alta el individuo.\n"
+              << "      -baja         <dar de baja>                  Dar de baja el individuo.\n"
+              << "      -modificar    <nombre,edad,disponibilidad>    Modificar un dato del individuo.\n"
+              << "      'valor'       El nuevo valor para el dato especificado.\n"
               << "  --backup        <realizar backup>               Realizar una copia de seguridad de los datos.\n"
               << "  -h               Mostrar este mensaje\n"
               << "Ejemplos:\n"
-              << "  ./SGH --gestionar pacientes -N 'Nombre Apellido1 Apellido2' -E 19 -alta\n"
+              << "  ./SGH --gestionar pacientes -id 123 -modificar nombre 'Nuevo Nombre'\n"
               << "  ./SGH --backup\n\n"
               << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
               << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
@@ -187,6 +277,7 @@ void showHelp() {
 
 int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     std::signal(SIGINT, signalHandler); // Interceptar CTL + C
+    setlocale(LC_ALL, "en_US.UTF-8");
 
     if (argc == 1) { // Modo interactivo :> sin argumentos
     int opcion;
@@ -217,7 +308,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::YELLOW << "\n\n Operacion => " << bcolors::WHITE;
             std::cin >> operacion;
 
-            gestionarPacientes(operacion, -1, -1, "", -1);  // Función para gestionar pacientes
+            gestionarPacientes(operacion, -1, -1, "", -1, -1, "");  // Función para gestionar pacientes
             break;
 
         case 2:
@@ -248,11 +339,15 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     }
 
     } else { // Ejecutar argumentos en CLI
+        int gestion;
         int operacion;
         int id = -1;
         std::string nombre = "";
         int edad = -1;
         int nuevaDisponibilidad = -1;
+        int aModificar; // que modificar; nombre,edad,disponibilidad
+        std::string modificacion; // Que categoria modificar
+        std::string modificado; // nuevo valor dentro de <aModificar>
 
         for (int i = 1; i < argc; i++) {
 
@@ -263,11 +358,11 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             if (strcmp(argv[i], "--gestionar") == 0) {
                 if (i + 1 < argc) {
                     if (strcmp(argv[i + 1], "pacientes") == 0) {
-                        operacion = 1;  // Gestionar pacientes
+                        gestion = 1;  // Gestionar pacientes
                     } else if (strcmp(argv[i + 1], "medicos") == 0) {
-                        operacion = 2;  // Gestionar médicos
+                        gestion = 2;  // Gestionar médicos
                     } else if (strcmp(argv[i + 1], "citas") == 0) {
-                        operacion = 3;  // Gestionar citas
+                        gestion = 3;  // Gestionar citas
                     }
                     i++; // Avanzar el indice
                 }
@@ -285,11 +380,34 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                 i++;
             }            
             else if (strcmp(argv[i], "-alta") == 0) {
+                operacion = 1;
                 nuevaDisponibilidad = 1;  // Alta
             }
             else if (strcmp(argv[i], "-baja") == 0) {
+                operacion = 1;
                 nuevaDisponibilidad = 0;  // Baja
             }
+            else if (strcmp(argv[i], "-modificar") == 0 && i + 1 < argc) {
+                operacion = 2;
+                if (i + 2 < argc) {
+                    // Primer argumento del modificar (nombre, edad, disponibilidad)
+                    modificacion = argv[i + 1];  // Usar la variable ya declarada fuera del bloque
+                    // Segundo argumento es el nuevo valor
+                    modificado = argv[i + 2];  // Asignar el nuevo valor a la variable global
+
+                    // Determinar qué modificar y asignar los valores
+                    if (modificacion == "nombre") {
+                        aModificar = 1;  // Indicar que se va a modificar el nombre
+                    } else if (modificacion == "edad") {
+                        aModificar = 2;  // Indicar que se va a modificar la edad
+                    } else if (modificacion == "disponibilidad") {
+                        aModificar = 3;  // Indicar que se va a modificar la disponibilidad
+                    }
+
+                    i += 2;  // Avanzar dos posiciones
+                }
+            }
+
             else if (strcmp(argv[i], "-h") == 0) {
                 showHelp(); 
                 return 0;
@@ -300,9 +418,11 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                 return 1;
             }
         }
-
-        if (operacion == 1) {
-            gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad);  // Operación pacientes
+        //DEBUGING std::cout << "\nGestion: " << gestion << "\nOperacion: " << operacion << "\n A Modificar: " << aModificar << "\nNuevo nivel: " << modificado;
+        if (gestion == 1) {
+            // Operaciónes de pacientes
+            gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad, aModificar, modificado);  // Dar de alta/baja
+        
         }
     }
 
