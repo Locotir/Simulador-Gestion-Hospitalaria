@@ -1,5 +1,6 @@
 #include "main.hpp" //bcolors
 #include "pacientes.hpp"
+#include "medicos.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -221,22 +222,56 @@ void agregarHistorialClinico(int pacienteID, const std::string& registro) {
 }
 
 // Función para cargar el historial clínico de un archivo
-void cargarHistorialClinico(const std::string& filename) {
+void cargarHistorialClinico(const std::string& filename, const std::vector<Paciente>& pacientes, const std::vector<Medico>& medicos, size_t idPacienteBuscado) {
     std::ifstream file(filename);
     std::string linea;
 
     while (std::getline(file, linea)) {
         std::stringstream ss(linea);
         std::string token;
-        
-        int pacienteID;
-        std::string registro;
-        
-        std::getline(ss, token, ','); // ID paciente
-        pacienteID = std::stoi(token);
-        std::getline(ss, registro);  // Registro clínico
 
-        std::cout << "Historial del Paciente ID " << pacienteID << ": " << registro << std::endl;
+        int idHistorial, idMedico;
+        size_t idPaciente;
+        std::string fecha, descripcion;
+
+        try {
+            // Leer los campos del archivo CSV
+            std::getline(ss, token, ',');  // ID del historial
+            idHistorial = std::stoi(token);
+
+            std::getline(ss, token, ',');  // ID del paciente
+            idPaciente = std::stoi(token);
+
+            std::getline(ss, token, ',');  // ID del médico
+            idMedico = std::stoi(token);
+
+            std::getline(ss, fecha, ',');  // Fecha
+            std::getline(ss, descripcion);  // Descripción
+
+            // Solo mostrar los historiales clínicos del paciente con el ID especificado
+            if (idPaciente == idPacienteBuscado) {
+                // Buscar los objetos correspondientes en los vectores
+                if (idPaciente < pacientes.size() && static_cast<size_t>(idMedico) < medicos.size()) {
+                    const Paciente& paciente = pacientes[idPaciente];
+                    const Medico& medico = medicos[idMedico];
+
+                    // Mostrar la información formateada
+                    std::cout << bcolors::BLUEL << "\nID Historial: " << bcolors::WHITE << idHistorial << std::endl
+                            << bcolors::BLUEL << "Paciente: " << bcolors::WHITE << paciente.getNombre() << std::endl
+                            << bcolors::BLUEL << "Doctor: " << bcolors::WHITE << medico.getNombre() << std::endl
+                            << bcolors::BLUEL << "Fecha: " << bcolors::WHITE << fecha << std::endl
+                            << bcolors::BLUEL << "Descripción: " << bcolors::WHITE << descripcion << std::endl
+                            << std::endl;
+                } else {
+                    std::cerr << "Error: ID de paciente o médico no encontrado en los datos." << std::endl;
+                }
+            }
+        } catch (const std::invalid_argument& e) {
+            // No hacer nada en caso de error de conversión
+        } catch (const std::out_of_range& e) {
+            // No hacer nada en caso de número fuera de rango
+        }
     }
 }
+
 

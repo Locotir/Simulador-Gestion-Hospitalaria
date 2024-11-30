@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <stdexcept>  // Necesario para std::runtime_error
 #include "citas.hpp"  // Acceder a la clase Cita
+#include "medicos.hpp"
 
 // Clase Paciente que contiene la información de un paciente.
 class Paciente {
@@ -59,6 +60,6 @@ Cita buscarCita(int id, const std::vector<Cita>& citas);
 
 // Funciones para gestionar historial clínico
 void agregarHistorialClinico(int pacienteID, const std::string& registro);
-void cargarHistorialClinico(const std::string& filename);
+void cargarHistorialClinico(const std::string& filename, const std::vector<Paciente>& pacientes, const std::vector<Medico>& medicos, size_t idPacienteBuscado);
 
 #endif // PACIENTES_HPP

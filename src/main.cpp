@@ -44,7 +44,8 @@ const std::string bcolors::RESET = "\033[0m";
 
 void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int nuevaDisponibilidad, int aModificar, std::string modificado, std::string fechaIngreso) {
     try {
-    std::vector<Paciente> pacientes = cargarPacientes(db_pacientes);
+    std::vector<Paciente> pacientes = cargarPacientes(db_pacientes); // Cargar los pacientes
+    std::vector<Medico> medicos = cargarMedicos(db_medicos);         // Cargar los médicos
 
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
     if (id == -1 && operacion != 3) { // en la operación 3 queremos hacer una busqueda aislada
@@ -289,11 +290,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
         }
 
         case 4: {  // Historial Clínico
-            std::string registro;
-            std::cout << "Ingrese el registro para el historial clínico: ";
-            std::cin.ignore();
-            std::getline(std::cin, registro);
-            agregarHistorialClinico(id, registro);
+            cargarHistorialClinico(db_historialClinico, pacientes, medicos, id); // Pasamos el id del paciente encontrado
             break;
         }
         default:
@@ -350,13 +347,15 @@ void showHelp() {
               << "      -alta         <dar de alta>                  Dar de alta el individuo.\n"
               << "      -baja         <dar de baja>                  Dar de baja el individuo.\n"
               << "      -modificar    <nombre,edad,disponibilidad>   Modificar un dato del individuo.\n"
-              << "      -buscar       <++-N/-E/-F/-id>               Buscar individuo mediante un único parámetro.\n"
-              << "      'valor'       El nuevo valor para el dato especificado.\n"
+              << "      -buscar       <+-N/-E/-F/-id>                Buscar individuo mediante un único parámetro.\n"
+              << "      -historial    <++-N/-E/-id>                  Buscar historial del individuo mediante un único parámetro.\n"
               << "  --backup        <realizar backup>               Realizar una copia de seguridad de los datos.\n"
               << "  -h               Mostrar este mensaje\n"
               << "Ejemplos:\n"
-              << "  ./SGH --gestionar pacientes -N 'Nombre Apellido1 Apellido2' -E 20 -alta\n"
+              << "  ./SGH --gestionar pacientes -N 'Marcos Garcia Zorin' -E 19 -alta\n" 
               << "  ./SGH --gestionar pacientes -id 123 -modificar nombre 'Nuevo Nombre'\n"
+              << "  ./SGH --gestionar pacientes -buscar -F 05-08-2015\n"
+              << "  ./SGH --gestionar pacientes -historial -N 'Marcos Garcia Zorin' -E 19\n"
               << "  ./SGH --backup\n\n"
               << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
               << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
@@ -392,8 +391,8 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::GREEN << "\n1. ⭥  Manejar el Alta/Baja";
             std::cout << bcolors::GREEN << "\n2. 📝 Modificar Datos";
             std::cout << bcolors::GREEN << "\n3. 🔎 Realizar Busqueda";
-            std::cout << bcolors::GREEN << "\n4. 🗎  Historial Clinico";
-            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
+            std::cout << bcolors::GREEN << "\n4. 🗎  Historial Clínico";
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operación ➟ " << bcolors::WHITE;
             std::cin >> operacion;
 
             gestionarPacientes(operacion, -1, -1, "", -1, -1, "", "");  // Función para gestionar pacientes
@@ -403,7 +402,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::BLUEL << "\n1. ⭥  Manejar el Alta/Baja";
             std::cout << bcolors::BLUEL << "\n2. ⚕️ Asignar Especialidad";
             std::cout << bcolors::BLUEL << "\n3. 🗎  Listar * Especialidad/Disponibilidad";
-            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operación ➟ " << bcolors::WHITE;
             std::cin >> operacion;
             //gestionarMedicos();    // Función para gestionar medicos
             break;
@@ -412,7 +411,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::RED << "\n2. 📅 Ordenar Citas * Fecha/Urgencia";
             std::cout << bcolors::RED << "\n3. 🗎  Registro de Citas";
             std::cout << bcolors::RED << "\n4. 📝 Cancelar/Modificar cita";
-            std::cout << bcolors::YELLOW << "\n\n ▶ Operacion ➟ " << bcolors::WHITE;
+            std::cout << bcolors::YELLOW << "\n\n ▶ Operación ➟ " << bcolors::WHITE;
             std::cin >> operacion;
             //gestionarCitas(operacion);      // Funcion para gestionar citas
             break;
@@ -503,6 +502,10 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             }
             else if (strcmp(argv[i], "-buscar") == 0) {
                 operacion = 3;
+            }
+
+            else if (strcmp(argv[i], "-historial") == 0) {
+                operacion = 4;
             }
 
             else if (strcmp(argv[i], "-h") == 0) {
