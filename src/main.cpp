@@ -42,6 +42,9 @@ const std::string bcolors::VIOLET = "\033[38;5;135m";
 const std::string bcolors::BLACK = "\033[30m";
 const std::string bcolors::RESET = "\033[0m";
 
+// =========================================================================================================================================================================================
+// =================================================================================== P A C I E N T E S ===================================================================================
+// =========================================================================================================================================================================================
 void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int nuevaDisponibilidad, int aModificar, std::string modificado, std::string fechaIngreso) {
     try {
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes); // Cargar los pacientes
@@ -301,6 +304,127 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
         std::cerr << bcolors::RED << "Se produjo un error: " << e.what() << bcolors::WHITE << std::endl;
     }
 }
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
+
+// =========================================================================================================================================================================================
+// ===================================================================================== M E D I C O S =====================================================================================
+// =========================================================================================================================================================================================
+void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDisponibilidad, std::string especialidad, std::string nuevaEspecialidad) {
+    try {
+        std::vector<Medico> medicos = cargarMedicos(db_medicos); // Cargar los médicos desde el archivo
+
+        // Si no se tiene ID, se pide al usuario ingresar datos para buscar al médico
+        if (id == -1 && operacion != 3) { // En la operación 3 no buscamos médico específico
+            if (especialidad.empty() || nombre.empty()) {
+                std::cout << bcolors::YELLOW << "\nIngrese el nombre completo del médico: " << bcolors::GREEN;
+                std::cin.ignore();
+                std::getline(std::cin, nombre);
+
+                std::cout << bcolors::YELLOW << "\nIngrese la especialidad del médico: " << bcolors::GREEN;
+                std::getline(std::cin, especialidad);
+            }
+
+            // Buscar médico por nombre completo y especialidad
+            bool encontrado = false;
+            for (const auto& medico : medicos) {
+                if (medico.getNombre() == nombre && medico.getEspecialidad() == especialidad) {
+                    id = medico.getId(); // Asignar el ID encontrado
+                    medico.mostrarInfo(); // Mostrar la información del médico
+                    encontrado = true;
+                    break;
+                }
+            }
+
+            if (!encontrado) {
+                std::cout << "No se encontró ningún médico con los datos proporcionados: " 
+                          << nombre << " (especialidad: " << especialidad << ").\n";
+                return; // Terminar la función si no se encuentra
+            }
+        }
+
+        // A partir de aquí, ya tenemos el ID
+        switch (operacion) {
+            case 1: { // Alta/Baja
+                auto it = std::find_if(medicos.begin(), medicos.end(), [id](const Medico& m) {
+                    return m.getId() == id;
+                });
+
+                if (it != medicos.end()) {
+                    if (nuevaDisponibilidad == -1) {
+                        std::cout << "\n¿Desea activar (1) o desactivar (0) la disponibilidad del médico? ";
+                        std::cin >> nuevaDisponibilidad;
+                    }
+
+                    if (it->getDisponibilidad() == nuevaDisponibilidad) {
+                        std::cout << it->getNombre() 
+                                  << " ya está " << (nuevaDisponibilidad == 1 ? "activo" : "inactivo") 
+                                  << ".\n";
+                    } else {
+                        it->setDisponibilidad(nuevaDisponibilidad); // Actualizar disponibilidad
+                        std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << it->getNombre() 
+                                  << " ha sido " << (nuevaDisponibilidad == 1 ? "activado" : "desactivado") 
+                                  << " correctamente.\n";
+
+                        guardarMedicos("db/medicos.csv", medicos);
+                    }
+                } else {
+                    throw std::runtime_error("Médico no encontrado para realizar la operación.");
+                }
+                break;
+            }
+
+            case 2: { // Asignar Especialidad
+                auto it = std::find_if(medicos.begin(), medicos.end(), [id](const Medico& m) {
+                    return m.getId() == id;
+                });
+
+                if (it != medicos.end()) {
+                    if (nuevaEspecialidad.empty()) {
+                        std::cout << "\nIngrese la nueva especialidad: ";
+                        std::getline(std::cin, nuevaEspecialidad);
+                    }
+
+                    it->setEspecialidad(nuevaEspecialidad); // Actualizar la especialidad
+                    std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << it->getNombre() 
+                                << " ahora es especialista en " 
+                                << nuevaEspecialidad << ".\n";
+
+                    guardarMedicos("db/medicos.csv", medicos);
+
+                } else {
+                    throw std::runtime_error("Médico no encontrado para realizar la operación.");
+                }
+                break;
+            }
+
+            case 3: { // Listar por Especialidad/Disponibilidad
+                if (especialidad.empty()) {
+                    std::cout << "\nIngrese la especialidad o disponibilidad para listar: ";
+                    std::cin.ignore();
+                    std::getline(std::cin, especialidad);
+                }
+
+                for (const auto& medico : medicos) {
+                    if (medico.getEspecialidad() == especialidad || 
+                        (especialidad == "1" && medico.getDisponibilidad() == 1) ||
+                        (especialidad == "0" && medico.getDisponibilidad() == 0)) {
+                        medico.mostrarInfo();
+                    }
+                }
+                break;
+            }
+
+            default:
+                std::cout << "Operación no válida.\n";
+                break;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+    }
+}
+
+
+
 
 
 
@@ -343,10 +467,13 @@ void showHelp() {
               << "      -id          <id>                            Identificador del individuo.\n"
               << "      -N           'Nombre Apellido1 Apellido2'    Nombre del individuo.\n"
               << "      -E           <edad>                          Edad del individuo.\n"
+              << "      -X           <1:0/especialidad>              Especialidad o disponibilidad del médico.\n"
+              << "      -NX           <especialidad>                 Nueva especialidad.\n"
               << "      -F           <Fecha de Ingreso>              Fecha de Ingreso del individuo\n"
               << "      -alta         <dar de alta>                  Dar de alta el individuo.\n"
               << "      -baja         <dar de baja>                  Dar de baja el individuo.\n"
               << "      -modificar    <nombre,edad,disponibilidad>   Modificar un dato del individuo.\n"
+              << "      -especialidad <nueva especialidad>           Cambiar especialidad.\n"
               << "      -buscar       <+-N/-E/-F/-id>                Buscar individuo mediante un único parámetro.\n"
               << "      -historial    <++-N/-E/-id>                  Buscar historial del individuo mediante un único parámetro.\n"
               << "  --backup        <realizar backup>               Realizar una copia de seguridad de los datos.\n"
@@ -356,6 +483,9 @@ void showHelp() {
               << "  ./SGH --gestionar pacientes -id 123 -modificar nombre 'Nuevo Nombre'\n"
               << "  ./SGH --gestionar pacientes -buscar -F 05-08-2015\n"
               << "  ./SGH --gestionar pacientes -historial -N 'Marcos Garcia Zorin' -E 19\n"
+              << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X Cardiología -alta\n"
+              << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X Cardiología -NX Pediatría -especialidad\n" 
+              << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X 1 -buscar\n"
               << "  ./SGH --backup\n\n"
               << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
               << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
@@ -404,7 +534,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             std::cout << bcolors::BLUEL << "\n3. 🗎  Listar * Especialidad/Disponibilidad";
             std::cout << bcolors::YELLOW << "\n\n ▶ Operación ➟ " << bcolors::WHITE;
             std::cin >> operacion;
-            //gestionarMedicos();    // Función para gestionar medicos
+            gestionarMedicos(operacion, -1, "", -1, "", "");    // Función para gestionar medicos
             break;
         case 3:
             std::cout << bcolors::RED << "\n1. 🗓️ Asignar Cita";
@@ -430,6 +560,8 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
         int operacion;
         int id = -1;
         std::string nombre = "";
+        std::string especialidad = "";
+        std::string nuevaEspecialidad = "";
         int edad = -1;
         int nuevaDisponibilidad = -1;
         int aModificar; // que modificar; nombre,edad,disponibilidad
@@ -461,6 +593,14 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             }  
             else if (strcmp(argv[i], "-N") == 0 && i + 1 < argc) {
                 nombre = argv[i + 1]; 
+                i++;
+            }
+            else if (strcmp(argv[i], "-X") == 0 && i + 1 < argc) {
+                especialidad = argv[i + 1]; 
+                i++;
+            }
+            else if (strcmp(argv[i], "-NX") == 0 && i + 1 < argc) {
+                nuevaEspecialidad = argv[i + 1]; 
                 i++;
             }
             else if (strcmp(argv[i], "-E") == 0 && i + 1 < argc) {
@@ -507,6 +647,9 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             else if (strcmp(argv[i], "-historial") == 0) {
                 operacion = 4;
             }
+            else if (strcmp(argv[i], "-especialidad") == 0) {
+                operacion = 2;
+            }
 
             else if (strcmp(argv[i], "-h") == 0) {
                 showHelp(); 
@@ -518,12 +661,22 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                 return 1;
             }
         }
-        //DEBUG std::cout << "\nGestion: " << gestion << "\nOperacion: " << operacion << "\n A Modificar: " << aModificar << "\nNuevo nivel: " << modificado << "\nFecha Ingreso:" << fechaIngreso;
-        if (gestion == 1) {
-            // Operaciónes de pacientes
-            gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad, aModificar, modificado, fechaIngreso); 
-        
+        // DEBUG std::cout << "\nGestion: " << gestion << "\nOperacion: " << operacion << "\n A Modificar: " << aModificar << "\nNuevo nivel: " << modificado << "\nFecha Ingreso:" << fechaIngreso << "\nEspecialidad: " << especialidad;
+        switch (gestion) {
+            case 1: {
+                // Operaciónes de pacientes
+                gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad, aModificar, modificado, fechaIngreso); 
+                break;
+            }
+                
+            case 2: {
+                // Operaciónes de médicos
+                gestionarMedicos(operacion, id, nombre, nuevaDisponibilidad, especialidad, nuevaEspecialidad);
+                break;
+            }
+                
         }
+
     }
 
     return 0; // Salida sin errores
