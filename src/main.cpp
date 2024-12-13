@@ -1,19 +1,22 @@
-#include <iostream>   // Proporciona funcionalidades de entrada y salida (cin, cout).
-#include <fstream>    // Permite el manejo de flujos de archivos (lectura y escritura en archivos).
-#include <csignal>    // Proporciona funciones para manejar eventos asincronos (senales).
-#include <cstring>    // Proporciona funciones para manejar cadenas de caracteres estilo C (e.g., strcpy, strlen).
-#include <sstream>    // Facilita las operaciones de flujo de cadenas para manipular cadenas como flujos.
-#include <vector>     // Implementa el contenedor vector para el manejo de arreglos dinamicos.
-#include <algorithm>  // Ofrece una coleccion de algoritmos (e.g., ordenamiento, busqueda).
-#include <ctime>      // Proporciona funciones para manipular y obtener informacion sobre fechas y horas.
-#include <string>
-#include <stdexcept>
-#include <filesystem>
+#include <iostream>         // Proporciona funcionalidades de entrada y salida (cin, cout).
+#include <fstream>          // Permite el manejo de flujos de archivos (lectura y escritura en archivos).
+#include <csignal>          // Proporciona funciones para manejar eventos asincronos (señales).
+#include <cstring>          // Proporciona funciones para manejar cadenas de caracteres estilo C (e.g., strcpy, strlen).
+#include <sstream>          // Facilita las operaciones de flujo de cadenas para manipular cadenas como flujos.
+#include <vector>           // Implementa el contenedor vector para el manejo de arreglos dinámicos.
+#include <algorithm>        // Ofrece una colección de algoritmos (e.g., ordenamiento, búsqueda).
+#include <ctime>            // Proporciona funciones para manipular y obtener información sobre fechas y horas.
+#include <string>           // Proporciona la clase std::string para manejo de cadenas de texto dinámicas.
+#include <stdexcept>        // Permite lanzar y capturar excepciones estándar.
+#include <filesystem>       // Proporciona funcionalidades para interactuar con el sistema de archivos (e.g., crear, eliminar archivos y directorios).
+#include <unordered_map>    // Implementa la estructura de datos mapa sin orden para almacenamiento eficiente de claves y valores.
+#include <cctype>           // Para funciones de manipulación de caracteres, como std::tolower.
 
 #ifdef UTF8_SUPPORT
-#include <locale>  // Necesario para setlocale
+#include <locale>           // Necesario para setlocale y soporte de locales, especialmente en UTF-8.
 #endif
 
+// --------------- Encabezados ---------------
 #include "main.hpp" // Bcolors
 #include "pacientes.hpp"
 #include "medicos.hpp"
@@ -28,7 +31,8 @@ const std::string db_pacientes = "db/pacientes.csv";
 const std::string db_medicos = "db/medicos.csv";
 const std::string db_citas = "db/citas.csv";
 const std::string db_historialClinico = "db/historial-clinico.csv";
-// Bcolors
+
+// --------------- Bcolors---------------
 const std::string bcolors::PURPLE = "\033[95m";
 const std::string bcolors::BLUE = "\033[94m";
 const std::string bcolors::BLUEL = "\033[96m";
@@ -39,6 +43,7 @@ const std::string bcolors::UNDERLINE = "\033[4m";
 const std::string bcolors::WHITE = "\033[37m";
 const std::string bcolors::ORANGE = "\033[38;5;208m";
 const std::string bcolors::VIOLET = "\033[38;5;135m";
+const std::string bcolors::MAGENTA = "\033[35m";
 const std::string bcolors::BLACK = "\033[30m";
 const std::string bcolors::RESET = "\033[0m";
 
@@ -50,6 +55,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
     std::vector<Paciente> pacientes = cargarPacientes(db_pacientes); // Cargar los pacientes
     std::vector<Medico> medicos = cargarMedicos(db_medicos);         // Cargar los médicos
 
+    // ------------------------------------------ Buscar ID Paciente ------------------------------------------
     // Si no se tiene ID, pero se tiene nombre y edad, o si no se tiene ID y nombre/edad, pedimos esos datos
     if (id == -1 && operacion != 3) { // en la operación 3 queremos hacer una busqueda aislada
         // Si no se tienen nombre y edad, pedimos los datos al usuario
@@ -77,9 +83,11 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             return;  // Si no se encuentra, terminamos la función
         }
     }
+    // ---------------------------------------------------------------------------------------------------------
+
     // A partir de aquí, ya tenemos el id y no necesitamos pedirlo nuevamente
     switch (operacion) {
-        case 1: {  // Alta/Baja
+        case 1: {  // ||||||||||||||||||||||||||||||||||||||||||| Alta/Baja |||||||||||||||||||||||||||||||||||||||||||
             try {
                 auto it = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
                     return p.getId() == id;
@@ -104,7 +112,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
                                 << " correctamente.\n";
 
                         // Solo guardar los cambios una vez
-                        guardarPacientes("db/pacientes.csv", pacientes);
+                        guardarPacientes(db_pacientes, pacientes);
                     }
                 } else {
                     throw std::runtime_error("Paciente no encontrado para realizar la operación.");
@@ -114,7 +122,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             }
             break;
         }
-        case 2: {  // Modificar Datos
+        case 2: {  // ||||||||||||||||||||||||||||||||||||||||||| Modificar Datos |||||||||||||||||||||||||||||||||||||||||||
             int disponibilidad;
             auto it = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
                 return p.getId() == id;
@@ -187,7 +195,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             }
 
             // Guardar cambios
-            guardarPacientes("db/pacientes.csv", pacientes);
+            guardarPacientes(db_pacientes, pacientes);
             std::cout << bcolors::BLUEL << "\nNuevos Datos Modificados:↴";
             // Aquí mostramos la información actualizada del paciente
             auto itMod = std::find_if(pacientes.begin(), pacientes.end(), [id](const Paciente& p) {
@@ -198,7 +206,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             }
             break;
         }
-        case 3: {  // Realizar Búsqueda
+        case 3: {  // ||||||||||||||||||||||||||||||||||||||||||| Realizar Búsqueda ||||||||||||||||||||||||||||||||||||||||||| 
             try {
                 // Comprobar si todos los parámetros de búsqueda son vacíos o no válidos, modo menu/CLI
                 if (fechaIngreso.empty() && id == -1 && nombre.empty() && edad == -1) {
@@ -292,7 +300,7 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
             break;
         }
 
-        case 4: {  // Historial Clínico
+        case 4: {  // ||||||||||||||||||||||||||||||||||||||||||| Historial Clínico||||||||||||||||||||||||||||||||||||||||||| 
             cargarHistorialClinico(db_historialClinico, pacientes, medicos, id); // Pasamos el id del paciente encontrado
             break;
         }
@@ -312,7 +320,8 @@ void gestionarPacientes(int operacion, int id, int edad, std::string nombre, int
 void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDisponibilidad, std::string especialidad, std::string nuevaEspecialidad) {
     try {
         std::vector<Medico> medicos = cargarMedicos(db_medicos); // Cargar los médicos desde el archivo
-
+        
+        // --------------------------------------- Buscar ID Médico ---------------------------------------
         // Si no se tiene ID, se pide al usuario ingresar datos para buscar al médico
         if (id == -1 && operacion != 3) { // En la operación 3 no buscamos médico específico
             if (especialidad.empty() || nombre.empty()) {
@@ -341,10 +350,11 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                 return; // Terminar la función si no se encuentra
             }
         }
+        // ------------------------------------------------------------------------------------------------------
 
         // A partir de aquí, ya tenemos el ID
         switch (operacion) {
-            case 1: { // Alta/Baja
+            case 1: { // ||||||||||||||||||||||||||||||||||||||||||| Alta/Baja |||||||||||||||||||||||||||||||||||||||||||
                 auto it = std::find_if(medicos.begin(), medicos.end(), [id](const Medico& m) {
                     return m.getId() == id;
                 });
@@ -365,7 +375,7 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                                   << " ha sido " << (nuevaDisponibilidad == 1 ? "activado" : "desactivado") 
                                   << " correctamente.\n";
 
-                        guardarMedicos("db/medicos.csv", medicos);
+                        guardarMedicos(db_medicos, medicos);
                     }
                 } else {
                     throw std::runtime_error("Médico no encontrado para realizar la operación.");
@@ -373,7 +383,7 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                 break;
             }
 
-            case 2: { // Asignar Especialidad
+            case 2: { // ||||||||||||||||||||||||||||||||||||||||||| Asignar Especialidad |||||||||||||||||||||||||||||||||||||||||||
                 auto it = std::find_if(medicos.begin(), medicos.end(), [id](const Medico& m) {
                     return m.getId() == id;
                 });
@@ -389,7 +399,7 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                                 << " ahora es especialista en " 
                                 << nuevaEspecialidad << ".\n";
 
-                    guardarMedicos("db/medicos.csv", medicos);
+                    guardarMedicos(db_medicos, medicos);
 
                 } else {
                     throw std::runtime_error("Médico no encontrado para realizar la operación.");
@@ -397,7 +407,7 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                 break;
             }
 
-            case 3: { // Listar por Especialidad/Disponibilidad
+            case 3: { // ||||||||||||||||||||||||||||||||||||||||||| Listar por Especialidad/Disponibilidad |||||||||||||||||||||||||||||||||||||||||||
                 if (especialidad.empty()) {
                     std::cout << "\nIngrese la especialidad o disponibilidad para listar: ";
                     std::cin.ignore();
@@ -413,7 +423,7 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
                 }
                 break;
             }
-
+            // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
             default:
                 std::cout << "Operación no válida.\n";
                 break;
@@ -422,12 +432,374 @@ void gestionarMedicos(int operacion, int id, std::string nombre, int nuevaDispon
         std::cerr << "Error: " << e.what() << '\n';
     }
 }
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
+
+// =========================================================================================================================================================================================
+// ======================================================================================= C I T A S =======================================================================================
+// =========================================================================================================================================================================================
+void gestionarCitas(int operacion, int idCita, std::string fecha, std::string nuevaFecha, std::string descripcion, std::string nombrePaciente, std::string nombreMedico, int aModificar, std::string nuevoEstado, std::string urgencia, int criterio) {
+    try {
+        std::vector<Cita> citas = cargarCitas(db_citas);  // Cargar las citas desde el archivo
+        std::vector<Medico> medicos = cargarMedicos(db_medicos); // Cargar los médicos desde el archivo
+        std::vector<Paciente> pacientes = cargarPacientes(db_pacientes); // Cargar los pacientes
+        std::vector<HistorialClinico> historialClinico = cargarHistorialClinico(db_historialClinico); // Cargar el historial clínico
 
 
+        switch (operacion) {
+            case 1: { // ||||||||||||||||||||||||||||||||||||||||||| Asignar Cita |||||||||||||||||||||||||||||||||||||||||||
+
+                // ::::::::::::::::::::::::::::::::::::::::::::::::: Paciente :::::::::::::::::::::::::::::::::::::::::::::::::
+                if (nombrePaciente.empty()) {
+                    std::cin.ignore(); // Evitar salto de línea
+                    std::cout << bcolors::YELLOW << "\nIngrese el nombre del paciente: " << bcolors::RESET;
+                    std::getline(std::cin, nombrePaciente);
+                }
+
+                // Buscar paciente por nombre
+                auto itPaciente = std::find_if(pacientes.begin(), pacientes.end(),
+                                            [&nombrePaciente](const Paciente& p) {
+                                                return p.getNombre() == nombrePaciente;
+                                            });
+
+                // ---------------------------------- Registrar Paciente si no Existe ----------------------------------
+                if (itPaciente == pacientes.end()) {
+                    // Si no se encuentra el paciente, solicitamos los datos
+                    std::cout << bcolors::RED << "\nEl paciente no está disponible o no existe, procediendo al registro.\n";
+                    std::cout << bcolors::YELLOW << "\nPor favor ingrese los datos del paciente:\n";
+
+                    std::string edadStr, fechaIngresoStr;
+                    int edad;
+
+                    std::cout << bcolors::GREEN << "\n--== Nuevo Registro de Paciente ==--\n";
+                    std::cout << bcolors::ORANGE << "Edad: " << bcolors::WHITE;
+                    std::getline(std::cin, edadStr);
+                    try {
+                        edad = std::stoi(edadStr);
+                    } catch (const std::invalid_argument& e) {
+                        std::cout << bcolors::RED << "La edad ingresada no es válida. Debe ser un número.\n";
+                        break;
+                    }
+
+                    std::cout << bcolors::ORANGE << "Fecha de ingreso (dd-mm-yyyy): " << bcolors::WHITE;
+                    std::getline(std::cin, fechaIngresoStr);
+
+                    // Asignar ID y disponibilidad (nuevo paciente será no disponible)
+                    int nuevoId = pacientes.empty() ? 0 : pacientes.back().getId() + 1;
+                    int disponibilidad = 1;  // Al registrar, se establece como disponible
+
+                    // Crear el nuevo paciente
+                    Paciente nuevoPaciente(nuevoId, nombrePaciente, edad, fechaIngresoStr, disponibilidad);
+                    pacientes.push_back(nuevoPaciente);
+
+                    // Guardar al paciente en el archivo CSV
+                    guardarPacientes(db_pacientes, pacientes); // Implementar esta función para guardar en CSV
+                    std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << bcolors::GREEN << " Paciente registrado exitosamente.\n";
+
+                    itPaciente = std::find_if(pacientes.begin(), pacientes.end(),
+                                            [&nombrePaciente](const Paciente& p) {
+                                                return p.getNombre() == nombrePaciente;
+                                            });
+                }
+                // -------------------------------------------------------------------------------------------------------
+
+                // Continuar con la asignación de la cita después de asegurar que el paciente existe
+                int idPaciente = itPaciente->getId();
+                std::cout << bcolors::GREEN << "\nPaciente " << nombrePaciente << " encontrado. Disponibilidad verificada.\n";
+                
+                // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+                // ::::::::::::::::::::::::::::::::::::::::::::::::: Médico :::::::::::::::::::::::::::::::::::::::::::::::::
+                if (nombreMedico.empty()) {
+                    std::cout << bcolors::YELLOW << "\nIngrese el nombre del médico: " << bcolors::RESET;
+                    std::getline(std::cin, nombreMedico);
+                }
+                // Buscar médico por nombre
+                auto itMedico = std::find_if(medicos.begin(), medicos.end(),
+                                            [&nombreMedico](const Medico& m) {
+                                                return m.getNombre() == nombreMedico;
+                                            });
+                // ---------------------------------- Registrar Médico si no Existe ----------------------------------
+                if (itMedico == medicos.end()) {
+                    // Si no se encuentra el médico, solicitamos los datos
+                    std::cout << bcolors::RED << "\nEl médico no existe, procediendo al registro.\n";
+                    std::cout << bcolors::YELLOW << "\nPor favor ingrese los datos del médico:\n";
+
+                    std::string especialidad;
+
+                    std::cout << bcolors::GREEN << "\n--== Nuevo Registro de Médico ==--\n";
+                    std::cout << bcolors::ORANGE << "Especialidad: " << bcolors::WHITE;
+                    std::getline(std::cin, especialidad);
+
+                    // Asignar ID y disponibilidad (nuevo médico será disponible)
+                    int nuevoIdMedico = medicos.empty() ? 0 : medicos.back().getId() + 1; // Último id +1
+                    int disponibilidadMedico = 1;  // Al registrar, se establece como disponible
+
+                    // Crear el nuevo médico
+                    Medico nuevoMedico(nuevoIdMedico, nombreMedico, especialidad, disponibilidadMedico);
+                    medicos.push_back(nuevoMedico);
+
+                    // Guardar al médico en el archivo CSV
+                    guardarMedicos(db_medicos, medicos); // Implementar esta función para guardar en CSV
+                    std::cout << "\n[" << bcolors::GREEN << "+" << bcolors::WHITE << "] " << bcolors::GREEN << " Médico registrado exitosamente.\n";
+
+                    itMedico = std::find_if(medicos.begin(), medicos.end(),
+                                            [&nombreMedico](const Medico& m) {
+                                                return m.getNombre() == nombreMedico;
+                                            });
+                }
+                // -------------------------------------------------------------------------------------------------------
+
+                // Continuar con la asignación de la cita después de asegurar que el médico existe
+                int idMedico = itMedico->getId();
+                std::cout << bcolors::GREEN << "\nMédico " << nombreMedico << " encontrado. Disponibilidad verificada.\n";
+
+                // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+                // ...................... Solicitar datos si no se ejecuta por argumentos CLI ......................
+                if (nuevaFecha.empty()) {
+                    std::cout << bcolors::YELLOW << "\nIngrese la fecha de la cita (dd-mm-yyyy): " << bcolors::RESET;
+                    std::getline(std::cin, nuevaFecha);
+                }
+            
+                if (nuevaFecha.empty() || nuevaFecha.length() != 10 || nuevaFecha[2] != '-' || nuevaFecha[5] != '-') {
+                    std::cout << bcolors::RED << "\nFecha inválida. Asegúrese de seguir el formato (dd-mm-yyyy).\n";
+                    break;
+                }
+
+                if (descripcion.empty()) {
+                    std::cout << bcolors::YELLOW << "\nIngrese la descripción de la cita: " << bcolors::RESET;
+                    std::getline(std::cin, descripcion);
+                }
+                
+                if (urgencia.empty()){
+                    std::cout << bcolors::YELLOW << "\nIngrese el nivel de urgencia (alta, media, baja): " << bcolors::RESET;
+                    std::getline(std::cin, urgencia);
+                }
+                
+                if (nuevoEstado.empty()) {
+                    std::cout << bcolors::YELLOW << "\nIngrese el estado de la cita (Pendiente, Completada, Cancelada): " << bcolors::RESET;
+                    std::getline(std::cin, nuevoEstado);
+                }
+                
+
+                // +++++++++++++++++++++++++++++++++++ Crear y guardar +++++++++++++++++++++++++++++++++++
+                int nuevoIdCita = citas.empty() ? 0 : citas.back().getId() + 1;
+                Cita nuevaCita(nuevoIdCita, idPaciente, idMedico, nuevaFecha, descripcion, urgencia, nuevoEstado);
+                citas.push_back(nuevaCita);
+
+                guardarCitas(db_citas, citas); // Guardar las citas actualizadas
+                guardarPacientes(db_pacientes, pacientes); // Guardar los cambios de disponibilidad en los pacientes
+                guardarMedicos(db_medicos, medicos); // Guardar los cambios de disponibilidad en los médicos
+
+                std::cout << bcolors::GREEN << "\nCita asignada exitosamente.\n";
+                break;
+            }
+            // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+            case 2: { // ||||||||||||||||||||||||||||||||||||||||||| Ordenar Citas por Fecha o Urgencia |||||||||||||||||||||||||||||||||||||||||||
+
+                if (criterio == -1) { // Si no se ejecuta por CLI
+                    std::cin.ignore(); // Evitar salto de línea
+                    std::cout << bcolors::YELLOW << "\nSeleccione el criterio de ordenación: ";
+                    std::cout << "\n1. Ordenar por Fecha";
+                    std::cout << "\n2. Ordenar por Urgencia";
+                    std::cout << "\n ▶ ";
+                    std::cin >> criterio;
+                }
+                
+                // Por fecha
+                if (criterio == 1) {
+                    std::sort(citas.begin(), citas.end(), [](const Cita& a, const Cita& b) {
+                        return a.getFecha() < b.getFecha();  // Ordenar por fecha
+                    });
+                    std::cout << bcolors::GREEN << "\nCitas ordenadas por fecha.\n";
+
+                // Por Urgencia
+                } else if (criterio == 2) {
+                    std::cout << "Ordenando por urgencia...\n"; // Mensaje de depuración
+                    std::sort(citas.begin(), citas.end(), [](const Cita& a, const Cita& b) {
+                        // Mapa de urgencia con las prioridades correctas
+                        static const std::unordered_map<std::string, int> urgenciaMap = {
+                            {"alta", 1},    // Alta tiene prioridad 1 (más urgente)
+                            {"media", 2},   // Media tiene prioridad 2
+                            {"baja", 3}     // Baja tiene prioridad 3 (menos urgente)
+                        };
+
+                        // Función para convertir las cadenas a minúsculas
+                        auto toLower = [](std::string str) {
+                            std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+                                return std::tolower(c);
+                            });
+                            return str;
+                        };
+
+                        // Obtener el valor de urgencia de cada cita, normalizado a minúsculas
+                        std::string urgenciaA = toLower(a.getUrgencia());
+                        std::string urgenciaB = toLower(b.getUrgencia());
+
+                        int urgenciaA_val = urgenciaMap.count(urgenciaA) ? urgenciaMap.at(urgenciaA) : 0;
+                        int urgenciaB_val = urgenciaMap.count(urgenciaB) ? urgenciaMap.at(urgenciaB) : 0;
 
 
+                        return urgenciaA_val < urgenciaB_val; // Orden ascendente: Alta primero
+                    });
+                    std::cout << bcolors::GREEN << "\nCitas ordenadas por urgencia.\n";
+                }
+                mostrarCitas(citas, pacientes, medicos); // Mostrar citas ordenadas
+                break;
+            }
+            // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+            case 3: { // ||||||||||||||||||||||||||||||||||||||||||| Registro Clínico (listar todos) |||||||||||||||||||||||||||||||||||||||||||
+                mostrarHistorialClinico(historialClinico, pacientes, medicos);
+                break;
+            }
+
+            case 4: { // ||||||||||||||||||||||||||||||||||||||||||| Cancelar, Modificar o Confirmar Cita |||||||||||||||||||||||||||||||||||||||||||
+
+                if (idCita == -1) { // Si no se pasa el ID de la cita, solicitamos el nombre del paciente y la fecha
+                     if (nombrePaciente.empty() && fecha.empty()) {
+                        std::cin.ignore(); // Evitar salto de línea
+                        std::cout << bcolors::YELLOW << "\nIngrese el nombre del paciente: " << bcolors::RESET;
+                        std::getline(std::cin, nombrePaciente);
+
+                        std::cout << bcolors::YELLOW << "\nIngrese la fecha de la cita (dd-mm-yyyy): " << bcolors::RESET;
+                        std::getline(std::cin, fecha);
+                     }
+                    
+                    auto itPaciente = std::find_if(pacientes.begin(), pacientes.end(),
+                                            [&nombrePaciente](const Paciente& p) {
+                                                return p.getNombre() == nombrePaciente;
+                                            });
+                    int idPaciente = itPaciente->getId();
+
+                    if (idPaciente == -1) {
+                        std::cout << bcolors::RED << "\nNo se encontró un paciente con ese nombre.\n";
+                        break;
+                    }
+
+                    // Buscar la cita con el ID del paciente y la fecha proporcionada
+                    auto it = std::find_if(citas.begin(), citas.end(), [&idPaciente, &fecha](const Cita& cita) {
+                        // Verificamos si el ID del paciente y la fecha coinciden
+                        return cita.getFecha() == fecha && cita.getIdPaciente() == idPaciente;
+
+                    });
+
+                    if (it != citas.end()) {
+                        idCita = it->getId(); // Si se encuentra, asignamos el ID de la cita
+                    } else {
+                        std::cout << bcolors::RED << "\nNo se encontró ninguna cita para el paciente con esa fecha.\n";
+                        break;
+                    }
+                }
+
+                // Ahora que tenemos el idCita, procedemos como en el código original
+                auto it = std::find_if(citas.begin(), citas.end(), [idCita](const Cita& cita) {
+                    return cita.getId() == idCita;
+                });
+
+                if (it != citas.end()) {
+
+                    if (aModificar == -1) { // Si no se ejecuta por CLI
+                        std::cout << bcolors::YELLOW << "\n¿Qué desea realizar? ";
+                        std::cout << "\n1. Cambiar el estado de la cita (Confirmada/Cancelada/Pendiente)";
+                        std::cout << "\n2. Modificar la fecha";
+                        std::cout << "\n3. Modificar la descripción de la cita";
+                        std::cout << "\n4. Cambiar nivel de urgencia";
+                        std::cout << "\n ▶ "  << bcolors::RESET;
+                        std::cin >> aModificar;
+                        std::cin.ignore(); // Limpiar el buffer de entrada
+
+                    }
+
+                    switch (aModificar) {
+                        case 1: {
+                        // ----------------------------------------------------- Cambiar estado de la cita -----------------------------------------------------
+                        // Pedir el nuevo estado si no se pasa como parámetro
+                        if (nuevoEstado.empty()) {
+                            std::cout << bcolors::YELLOW << "\nIngrese el nuevo estado de la cita (Confirmada/Cancelada/Pendiente): " << bcolors::RESET;
+                            std::getline(std::cin, nuevoEstado);
+                        }
+
+                        // Validar el estado ingresado
+                        if (nuevoEstado == "Confirmada" || nuevoEstado == "Cancelada" || nuevoEstado == "Pendiente") {
+                            it->setEstado(nuevoEstado);
+                            guardarCitas(db_citas, citas);  // Guardar cambios
+                            std::cout << bcolors::GREEN << "\nEstado de la cita actualizado exitosamente a " << nuevoEstado << ".\n";
+                        } else {
+                            std::cout << bcolors::RED << "\nEstado inválido. Debe ser Confirmada / Cancelada / Pendiente.\n" << bcolors::RESET;
+                        }
+                        break;
+                        }
+
+                        case 2: {
+                            // ----------------------------------------------------- Cambiar la fecha -----------------------------------------------------
+                            // Pedir la nueva fecha si no se pasa como parámetro
+                            if (nuevaFecha.empty()) {
+                                std::cout << bcolors::YELLOW << "\nIngrese la nueva fecha (dd-mm-yyyy): " << bcolors::RESET;
+                                std::getline(std::cin, nuevaFecha);
+                            }
+                            // Actualizar la cita
+                            it->setFecha(nuevaFecha);
+
+                            guardarCitas(db_citas, citas);  // Guardar cambios
+                            std::cout << bcolors::GREEN << "\nCita modificada exitosamente.\n";
+                            break;
+                            }
+                        case 3: {
+                            // ----------------------------------------------------- Cambiar la descripción -----------------------------------------------------
+                            // Pedir la nueva descripción si no se pasa como parámetro
+                            if (descripcion.empty()) {
+                                std::cout << bcolors::YELLOW << "\nIngrese la nueva descripción: "<< bcolors::RESET;
+                                std::getline(std::cin, descripcion);
+                            }
+
+                            it->setDescripcion(descripcion);
+                            guardarCitas(db_citas, citas);  // Guardar cambios
+                            std::cout << bcolors::GREEN << "\nCita modificada exitosamente.\n";
+                            break;
+
+                        }
+                        case 4: {
+                            // ----------------------------------------------------- Cambiar la urgencia -----------------------------------------------------
+                            // Pedir el nuevo nivel de urgencia si no se pasa como parámetro
+                            if (urgencia.empty()) {
+                                std::cout << bcolors::YELLOW << "\nIngrese el nuevo nivel de urgencia: " << bcolors::RESET;
+                                std::getline(std::cin, urgencia);
+                            }
+
+                            it->setUrgencia(urgencia);
+                            guardarCitas(db_citas, citas);  // Guardar cambios
+                            std::cout << bcolors::GREEN << "\nCita modificada exitosamente.\n";
+                            break;
+                        }
+                        default: {
+                        std::cout << bcolors::RED << "\nOpción no válida.\n" << bcolors::RESET;
+                    }
+                    }
+                    
+
+                } else {
+                    std::cout << bcolors::RED << "\nCita no encontrada.\n";
+                }
+                break;
+            }
+            // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+            default:
+                std::cout << "Operación no válida.\n"; 
+                break;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+    }
+}
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
 
 
+// =========================================================================================================================================================================================
+// ====================================================================================== B A C K U P ======================================================================================
+// =========================================================================================================================================================================================
 void realizarBackup() {
     // Directorio donde se encuentran los archivos CSV
     fs::path dir = "./db";  
@@ -451,28 +823,40 @@ void realizarBackup() {
         }
     }
 }
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Manegar CTL + C Exit +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Manegar CTL + C Exit ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void signalHandler([[maybe_unused]] int signum) {
-    std::cout << bcolors::WHITE << "\n\n[" << bcolors::RED << "!" << bcolors::WHITE << "] ""Exiting...\n";
+    std::cout << bcolors::WHITE << "\n\n[" << bcolors::RED << "!" << bcolors::WHITE << "] ""Saliendo...\n";
     exit(0); // Exit program
 }
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Mostrar Mensaje de Ayuda +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Mostrar Mensaje de Ayuda ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void showHelp() {
     std::cout << "\nUso: ./SGH [opciones]\n"
               << "Opciones:\n"
               << "  --gestionar     <pacientes,medicos,citas>       Area de enfoque.\n"
-              << "      -id          <id>                            Identificador del individuo.\n"
-              << "      -N           'Nombre Apellido1 Apellido2'    Nombre del individuo.\n"
-              << "      -E           <edad>                          Edad del individuo.\n"
-              << "      -X           <1:0/especialidad>              Especialidad o disponibilidad del médico.\n"
-              << "      -NX           <especialidad>                 Nueva especialidad.\n"
-              << "      -F           <Fecha de Ingreso>              Fecha de Ingreso del individuo\n"
+              << "      -id           <id>                            Identificador del individuo.\n"
+              << "      -N            <'Nombre Apellido1 Apellido2'>  Nombre del paciente.\n"
+              << "      -NM           <'Nombre Apellido1 Apellido2'>  Nombre del medico.\n"
+              << "      -E            <edad>                          Edad del individuo.\n"
+              << "      -X            <1:0/especialidad>              Especialidad o disponibilidad del médico.\n"
+              << "      -NX           <especialidad>                  Nueva especialidad.\n"
+              << "      -F            <dd-mm-yyyy>                    Fecha de Ingreso/Cita del individuo\n"
+              << "      -NF           <dd-mm-yyyy>                    Nueva fecha de Ingreso/Cita del individuo\n"
               << "      -alta         <dar de alta>                  Dar de alta el individuo.\n"
               << "      -baja         <dar de baja>                  Dar de baja el individuo.\n"
+              << "      --registro    <listar registros>             Lista todos los registros clínicos.\n"
               << "      -modificar    <nombre,edad,disponibilidad>   Modificar un dato del individuo.\n"
+              << "      -NC           <Nueva Cita>                   Crear nueva cita.\n"
+              << "      -MC           <Modificar Cita>               Modificar cita existente.\n"
+              << "      -confirmar    <Confirma cita>                Cambia el estado de la cita a Confirmada.\n"
+              << "      -cancelar     <Cancela cita>                 Cambia el estado de la cita a Cancelada.\n"
+              << "      -pendiente    <Cita pendiente>               Cambia el estado de la cita a Pendiente.\n"
+              << "      -descripcion  <'descripción'>                Cambia la descripción de la cita.\n"
+              << "      -urgencia     <alta/media/baja>              Nivel de urgencia de la cita.\n"
+              << "      --listar       <urgencia/fecha>               Listar citas por fecha o nivel de urgencia.\n"
               << "      -especialidad <nueva especialidad>           Cambiar especialidad.\n"
               << "      -buscar       <+-N/-E/-F/-id>                Buscar individuo mediante un único parámetro.\n"
               << "      -historial    <++-N/-E/-id>                  Buscar historial del individuo mediante un único parámetro.\n"
@@ -486,12 +870,20 @@ void showHelp() {
               << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X Cardiología -alta\n"
               << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X Cardiología -NX Pediatría -especialidad\n" 
               << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X 1 -buscar\n"
+              << "  ./SGH --gestionar citas -NC -N 'Marcos Garcia Zorin' -NM 'Luis Torres Martín' -NF '29-12-2024' -descripcion 'Revisión de Oído' -urgencia alta -confirmar\n"
+              << "  ./SGH --gestionar citas --listar urgencia\n"
+              << "  ./SGH --gestionar citas --registro\n"
+              << "  ./SGH --gestionar citas -MC -F '16-11-2024' -N 'Marcos Garcia Zorin' -NF '17-11-2024'\n"
+              << "  ./SGH --gestionar citas -MC -F '16-11-2024' -N 'Marcos Garcia Zorin' -cancelar'\n"
               << "  ./SGH --backup\n\n"
               << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
               << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
 }
+// -.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.
 
-
+// =========================================================================================================================================================================================
+// ======================================================================================== M A I N ========================================================================================
+// =========================================================================================================================================================================================
 int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     std::signal(SIGINT, signalHandler); // Interceptar CTL + C
     setlocale(LC_ALL, "en_US.UTF-8");
@@ -539,14 +931,14 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
         case 3:
             std::cout << bcolors::RED << "\n1. 🗓️ Asignar Cita";
             std::cout << bcolors::RED << "\n2. 📅 Ordenar Citas * Fecha/Urgencia";
-            std::cout << bcolors::RED << "\n3. 🗎  Registro de Citas";
+            std::cout << bcolors::RED << "\n3. 🗎  Registros";
             std::cout << bcolors::RED << "\n4. 📝 Cancelar/Modificar cita";
             std::cout << bcolors::YELLOW << "\n\n ▶ Operación ➟ " << bcolors::WHITE;
             std::cin >> operacion;
-            //gestionarCitas(operacion);      // Funcion para gestionar citas
+            gestionarCitas(operacion, -1, "", "", "", "", "", -1, "", "", -1);      // Funcion para gestionar citas
             break;
         case 4:
-            realizarBackup();      // Función para realizar backup
+            realizarBackup();   // Función para realizar backup
             break;
         default:
             std::cout << bcolors::RED << "Opción inválida!" << std::endl << std::endl;
@@ -555,25 +947,39 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
             return 1;
     }
 
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+// |||||||||||||||||||||||||||||||||||||||||||||||||||| CLI FLAG ARGUMENTS ||||||||||||||||||||||||||||||||||||||||||||||||||||
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     } else { // Ejecutar argumentos en CLI
-        int gestion;
-        int operacion;
+        int gestion; // {pacientes, medicos, citas}
+        int operacion; // 
         int id = -1;
-        std::string nombre = "";
-        std::string especialidad = "";
-        std::string nuevaEspecialidad = "";
-        int edad = -1;
-        int nuevaDisponibilidad = -1;
-        int aModificar; // que modificar; nombre,edad,disponibilidad
+        std::string nombre;
+        std::string nombreMedico;
+        std::string especialidad; // de médico
+        std::string nuevaEspecialidad; // de médico
+        int edad = -1; // paciente
+        int nuevaDisponibilidad = -1; // pacientes y medicos
+        int aModificar = -1; // que modificar; nombre,edad,disponibilidad
         std::string modificacion; // Que categoria modificar
         std::string modificado; // nuevo valor dentro de <aModificar>
-        std::string fechaIngreso; 
+        std::string fecha; 
+        std::string nuevaFecha; //  modificar la fecha
+        std::string descripcion; // para gestion de citas
+        std::string nuevoEstado; // citas -> modificarlo
+        std::string urgencia;  // crear / ordenar citas
+        int criterio = -1; // para --listar
+
+        std::unordered_map<std::string, std::string> estadoMap = {
+                {"-confirmar", "Confirmada"},
+                {"-cancelar", "Cancelada"},
+                {"-pendiente", "Pendiente"}
+            };
 
         for (int i = 1; i < argc; i++) {
-
             if (strcmp(argv[i], "--backup") == 0) {
                 realizarBackup();
-                return 0;  // Salimos del programa despues de hacer el backup
+                return 0;  // Salimos del programa después de hacer el backup
             }
             if (strcmp(argv[i], "--gestionar") == 0) {
                 if (i + 1 < argc) {
@@ -583,95 +989,168 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                         gestion = 2;  // Gestionar médicos
                     } else if (strcmp(argv[i + 1], "citas") == 0) {
                         gestion = 3;  // Gestionar citas
+                    } else {
+                        std::cout << bcolors::RED << "\n!!!Argumento desconocido para --gestionar: " << argv[i + 1] << bcolors::YELLOW << std::endl;
+                        showHelp();
+                        return 1;
                     }
-                    i++; // Avanzar el indice
+                    i++; // Avanzar el índice para saltar el argumento procesado
+                    continue; // Saltar a la siguiente iteración
+                } else {
+                    std::cout << bcolors::RED << "\n!!!Falta el tipo de gestión después de --gestionar" << bcolors::YELLOW << std::endl;
+                    showHelp();
+                    return 1;
                 }
             }
-            else if (strcmp(argv[i], "-id") == 0 && i + 1 < argc) {
+            else if (strcmp(argv[i], "-id") == 0 && i + 1 < argc) { // ID de individuo
                 id = std::atoi(argv[i + 1]); 
                 i++;
             }  
-            else if (strcmp(argv[i], "-N") == 0 && i + 1 < argc) {
+            else if (strcmp(argv[i], "-N") == 0 && i + 1 < argc) { // Nombre
                 nombre = argv[i + 1]; 
                 i++;
             }
-            else if (strcmp(argv[i], "-X") == 0 && i + 1 < argc) {
+            else if (strcmp(argv[i], "-NM") == 0 && i + 1 < argc) { // Nombre Médico
+                nombreMedico = argv[i + 1]; 
+                i++;
+            }
+            else if (strcmp(argv[i], "-X") == 0 && i + 1 < argc) { // Especialidad
                 especialidad = argv[i + 1]; 
                 i++;
             }
-            else if (strcmp(argv[i], "-NX") == 0 && i + 1 < argc) {
+            else if (strcmp(argv[i], "-NX") == 0 && i + 1 < argc) { // Nueva Especialidad
                 nuevaEspecialidad = argv[i + 1]; 
                 i++;
             }
-            else if (strcmp(argv[i], "-E") == 0 && i + 1 < argc) {
+            else if (strcmp(argv[i], "-E") == 0 && i + 1 < argc) { // Edad
                 edad = std::atoi(argv[i + 1]); 
                 i++;
             }
-            else if (strcmp(argv[i], "-F") == 0 && i + 1 < argc) {
-                fechaIngreso = argv[i + 1]; 
+            else if (strcmp(argv[i], "-F") == 0 && i + 1 < argc) { // Fecha
+                fecha = argv[i + 1]; 
+                i++;
+            }
+            else if (strcmp(argv[i], "-NF") == 0 && i + 1 < argc) { // Nueva Fecha
+                aModificar = 2;
+                nuevaFecha = argv[i + 1]; 
                 i++;
             }
                        
-            else if (strcmp(argv[i], "-alta") == 0) {
+            else if (strcmp(argv[i], "-alta") == 0) { // para pacientes y medicos
                 operacion = 1;
                 nuevaDisponibilidad = 1;  // Alta
             }
-            else if (strcmp(argv[i], "-baja") == 0) {
+            else if (strcmp(argv[i], "-baja") == 0) { // para pacientes y médicos
                 operacion = 1;
                 nuevaDisponibilidad = 0;  // Baja
             }
-            else if (strcmp(argv[i], "-modificar") == 0 && i + 1 < argc) {
+
+            else if (strcmp(argv[i], "-modificar") == 0 && i + 1 < argc) { // pacientes
                 operacion = 2;
                 if (i + 2 < argc) {
-                    // Primer argumento del modificar (nombre, edad, disponibilidad)
-                    modificacion = argv[i + 1];  // Usar la variable ya declarada fuera del bloque
-                    // Segundo argumento es el nuevo valor
-                    modificado = argv[i + 2];  // Asignar el nuevo valor a la variable global
+
+                    modificacion = argv[i + 1]; // Primer argumento del modificar (nombre, edad, disponibilidad)
+                    modificado = argv[i + 2];  // Segundo argumento es el nuevo valor
 
                     // Determinar qué modificar y asignar los valores
                     if (modificacion == "nombre") {
-                        aModificar = 1;  // Indicar que se va a modificar el nombre
+                        aModificar = 1;  
                     } else if (modificacion == "edad") {
-                        aModificar = 2;  // Indicar que se va a modificar la edad
+                        aModificar = 2;  
                     } else if (modificacion == "disponibilidad") {
-                        aModificar = 3;  // Indicar que se va a modificar la disponibilidad
+                        aModificar = 3;  
                     }
 
                     i += 2;  // Avanzar dos posiciones
                 }
             }
-            else if (strcmp(argv[i], "-buscar") == 0) {
+            else if (strcmp(argv[i], "-buscar") == 0) { // pacientes
                 operacion = 3;
             }
 
-            else if (strcmp(argv[i], "-historial") == 0) {
+            else if (strcmp(argv[i], "-historial") == 0) { // pacientes
                 operacion = 4;
             }
+
             else if (strcmp(argv[i], "-especialidad") == 0) {
                 operacion = 2;
             }
+            
+            else if (strcmp(argv[i], "-NC") == 0) { // Nueva Cita
+                operacion = 1;
+            }
 
-            else if (strcmp(argv[i], "-h") == 0) {
+            else if (strcmp(argv[i], "-MC") == 0) { // Modificar Cita
+                operacion = 4;
+            }
+
+
+            else if (estadoMap.find(argv[i]) != estadoMap.end()) { // {confirmar, cancelar, pendiente} : Citas
+                aModificar = 1;
+                nuevoEstado = estadoMap[argv[i]];
+                i++;
+            }
+
+
+            else if (strcmp(argv[i], "-descripcion") == 0 && i + 1 < argc) { // Descripcion de la cita
+                aModificar = 3;
+                descripcion = argv[i + 1]; 
+                i++;
+            }
+
+            else if (strcmp(argv[i], "-urgencia") == 0 && i + 1 < argc) { // Urgencia de cita
+                aModificar = 4;
+                urgencia = argv[i + 1]; 
+                i++;
+            }
+
+            else if (strcmp(argv[i], "--listar") == 0 && i + 1 < argc) { // Listar por fecha/urgencia las citas
+                operacion = 2;
+                if (strcmp(argv[i + 1], "fecha") == 0) {
+                    criterio = 1;
+                } else if (strcmp(argv[i + 1], "urgencia") == 0) {
+                    criterio = 2;
+                } else {
+                    std::cout << bcolors::RED 
+                            << "Parámetro no admitido, solamente -> fecha / urgencia"
+                            << bcolors::YELLOW << std::endl;
+                }
+                i++; 
+            }
+
+            else if (strcmp(argv[i], "--registro") == 0) { // Listar los registros clínicos
+                operacion = 3;
+            }
+
+            else if (strcmp(argv[i], "-h") == 0) { // Menú de Ayuda
                 showHelp(); 
                 return 0;
             }
+
             else {
                 std::cout << bcolors::RED << "\n!!!Argumento desconocido: " << argv[i] << bcolors::YELLOW << std::endl;
                 showHelp();
                 return 1;
             }
         }
-        // DEBUG std::cout << "\nGestion: " << gestion << "\nOperacion: " << operacion << "\n A Modificar: " << aModificar << "\nNuevo nivel: " << modificado << "\nFecha Ingreso:" << fechaIngreso << "\nEspecialidad: " << especialidad;
+
+// ------------------------------------------- Procesar Argumentos del CLI -------------------------------------------
         switch (gestion) {
             case 1: {
                 // Operaciónes de pacientes
-                gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad, aModificar, modificado, fechaIngreso); 
+                gestionarPacientes(operacion, id, edad, nombre, nuevaDisponibilidad, aModificar, modificado, fecha); 
                 break;
             }
                 
             case 2: {
                 // Operaciónes de médicos
                 gestionarMedicos(operacion, id, nombre, nuevaDisponibilidad, especialidad, nuevaEspecialidad);
+                break;
+            }
+
+            case 3: {
+                // Operaciónes de Citas
+                gestionarCitas(operacion, id, fecha, nuevaFecha, descripcion, nombre, nombreMedico, aModificar, nuevoEstado, urgencia, criterio);
                 break;
             }
                 
@@ -682,4 +1161,6 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
     return 0; // Salida sin errores
 }
 
-
+// ##################################################################################################################################################################
+// ##################################################################################################################################################################
+// ##################################################################################################################################################################
