@@ -1,12 +1,12 @@
-ID_Cita,ID_Paciente,ID_Medico,Fecha,Descripcion
-0,0,0,2024-11-15,Revisión Básica
-1,1,1,2024-11-18,Consulta de Seguimiento
-2,2,2,2024-11-20,Evaluación de Manchas Cutáneas
-3,3,3,2024-11-22,Diagnóstico de Migrañas
-4,4,4,2024-11-25,Control de Fractura
-5,5,5,2024-11-27,Examen Preventivo
-6,6,6,2024-11-30,Consulta por Dolor Crónico
-7,7,7,2024-12-02,Chequeo de Tiroides
-8,8,8,2024-12-04,Consulta Oncológica
-9,9,9,2024-12-07,Revisión de Oído
-10,10,10,2024-12-10,Evaluación Psicológica
+ID,ID_Paciente,ID_Medico,fecha,descripcion,urgencia,estado
+0,0,0,16-11-2024,Revisión Media,Media,Pendiente
+1,1,1,18-11-2024,Consulta de Seguimiento,Baja,Confirmada
+2,2,2,20-11-2024,Evaluación de Manchas Cutáneas,Alta,Pendiente
+3,3,3,22-11-2024,Diagnóstico de Migrañas,Alta,Confirmada
+4,4,4,25-11-2024,Control de Fractura,Alta,Cancelada
+5,5,5,27-11-2024,Examen Preventivo,Baja,Pendiente
+6,6,6,30-11-2024,Consulta por Dolor Crónico,Media,Confirmada
+7,7,7,02-12-2024,Chequeo de Tiroides,Baja,Pendiente
+8,8,8,04-12-2024,Consulta Oncológica,Alta,Confirmada
+9,9,9,07-12-2024,Revisión de Oído,Media,Cancelada
+10,10,10,10-12-2024,Evaluación Psicológica,Media,Pendiente
