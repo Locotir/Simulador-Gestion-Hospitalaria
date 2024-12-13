@@ -15,6 +15,7 @@ public:
     static const std::string WHITE;
     static const std::string ORANGE;
     static const std::string VIOLET;
+    static const std::string MAGENTA;
     static const std::string BLACK;
     static const std::string RESET;
 };
