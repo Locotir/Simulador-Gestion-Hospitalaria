@@ -22,7 +22,6 @@
 #include "medicos.hpp"
 #include "citas.hpp"
 #include "reportes.hpp"
-#include "archivos.hpp" 
 
 
 // Directorio de las bases de datos CSV
@@ -504,7 +503,7 @@ void gestionarCitas(int operacion, int idCita, std::string fecha, std::string nu
 
                 // Continuar con la asignación de la cita después de asegurar que el paciente existe
                 int idPaciente = itPaciente->getId();
-                std::cout << bcolors::GREEN << "\nPaciente " << nombrePaciente << " encontrado. Disponibilidad verificada.\n";
+                std::cout << bcolors::GREEN << "\nPaciente " << nombrePaciente << " encontrado.\n";
                 
                 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -551,7 +550,11 @@ void gestionarCitas(int operacion, int idCita, std::string fecha, std::string nu
 
                 // Continuar con la asignación de la cita después de asegurar que el médico existe
                 int idMedico = itMedico->getId();
-                std::cout << bcolors::GREEN << "\nMédico " << nombreMedico << " encontrado. Disponibilidad verificada.\n";
+                if (itMedico->getDisponibilidad() == 0) {
+                        std::cout << bcolors::RED << "\nMédico encontrado pero no disponible.\n";
+                        exit(1); // Salir del programa
+                    }
+                std::cout << bcolors::GREEN << "\nMédico " << nombreMedico << " encontrado & disponibilidad verificada.\n";
 
                 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
