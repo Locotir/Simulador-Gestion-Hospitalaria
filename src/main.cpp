@@ -654,7 +654,43 @@ void gestionarCitas(int operacion, int idCita, std::string fecha, std::string nu
             // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
             case 3: { // ||||||||||||||||||||||||||||||||||||||||||| Registro Clínico (listar todos) |||||||||||||||||||||||||||||||||||||||||||
-                mostrarHistorialClinico(historialClinico, pacientes, medicos);
+                if (aModificar == -1) {
+                    std::cout << bcolors::YELLOW << "\n1. Citas pendientes por médico o especialidad\n";
+                    std::cout << "2. Listado de pacientes atendidos en un rango de fechas\n";
+                    std::cout << "3. Reporte de pacientes con enfermedades crónicas\n";
+                    std::cout << "\n ▶ " << bcolors::RESET;
+                    std::cin >> aModificar;
+                }
+
+                switch (aModificar) {
+                    case 1: {
+                        if (nombreMedico.empty()) {
+                            std::cin.ignore();
+                            std::cout << bcolors::YELLOW << "Ingrese el nombre del médico o especialidad (o deje vacío para todos): " << bcolors::RESET;
+                            std::getline(std::cin, nombreMedico);
+                        }
+
+                        citasPendientesPorMedicoOEspecialidad(citas, medicos, pacientes, nombreMedico);
+                        break;
+                    }
+                    case 2: {
+                        if (fecha.empty() || nuevaFecha.empty()) {
+                            std::cout << bcolors::YELLOW << "Ingrese la fecha de inicio (dd-mm-yyyy): " << bcolors::RESET;
+                            std::cin >> fecha;
+                            std::cout << bcolors::YELLOW << "Ingrese la fecha de fin (dd-mm-yyyy): " << bcolors::RESET;
+                            std::cin >> nuevaFecha;
+                        }
+
+                        listarPacientesPorFecha(historialClinico, pacientes, fecha, nuevaFecha);
+                        break;
+                    }
+                    case 3:
+                        reportePacientesCronicos(historialClinico, pacientes);
+                        break;
+
+                    default:
+                        std::cout << "Opción no válida.\n";
+                }
                 break;
             }
 
@@ -850,7 +886,8 @@ void showHelp() {
               << "      -NF           <dd-mm-yyyy>                    Nueva fecha de Ingreso/Cita del individuo\n"
               << "      -alta         <dar de alta>                  Dar de alta el individuo.\n"
               << "      -baja         <dar de baja>                  Dar de baja el individuo.\n"
-              << "      --registro    <listar registros>             Lista todos los registros clínicos.\n"
+              << "      --reporte    <F,NF|NM|cronico>               Lista todos los registros clínicos por filtros.\n"
+              << "      -cronico      <aplicar filtro>               Aplica el filtro de crónicos para el registro.\n"
               << "      -modificar    <nombre,edad,disponibilidad>   Modificar un dato del individuo.\n"
               << "      -NC           <Nueva Cita>                   Crear nueva cita.\n"
               << "      -MC           <Modificar Cita>               Modificar cita existente.\n"
@@ -875,9 +912,13 @@ void showHelp() {
               << "  ./SGH --gestionar medicos -N 'Luis Torres Martín' -X 1 -buscar\n"
               << "  ./SGH --gestionar citas -NC -N 'Marcos Garcia Zorin' -NM 'Luis Torres Martín' -NF '29-12-2024' -descripcion 'Revisión de Oído' -urgencia alta -confirmar\n"
               << "  ./SGH --gestionar citas --listar urgencia\n"
-              << "  ./SGH --gestionar citas --registro\n"
+              << "  ./SGH --gestionar citas --reporte\n"
               << "  ./SGH --gestionar citas -MC -F '16-11-2024' -N 'Marcos Garcia Zorin' -NF '17-11-2024'\n"
-              << "  ./SGH --gestionar citas -MC -F '16-11-2024' -N 'Marcos Garcia Zorin' -cancelar'\n"
+              << "  ./SGH --gestionar citas -MC -F '16-11-2024' -N 'Marcos Garcia Zorin' -cancelar\n"
+              << "  ./SGH --gestionar citas --reporte -F '15-11-2024' -NF '10-12-2024'\n"
+              << "  ./SGH --gestionar citas --reporte -NM 'Luis Torres Martín'\n"
+              << "  ./SGH --gestionar citas --reporte -NM 'Cardiología'\n"
+              << "  ./SGH --gestionar citas --reporte -cronico\n"
               << "  ./SGH --backup\n\n"
               << bcolors::BLUEL << "[" << bcolors::PURPLE << "?" << bcolors::BLUEL << "]"
               << bcolors::GREEN << " Si se ejecuta sin argumentos, el modo interactivo empezará." << std::endl;
@@ -1121,8 +1162,12 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                 i++; 
             }
 
-            else if (strcmp(argv[i], "--registro") == 0) { // Listar los registros clínicos
+            else if (strcmp(argv[i], "--reporte") == 0) { // Listar los registros clínicos
                 operacion = 3;
+                aModificar = 1;
+            }
+            else if (strcmp(argv[i], "-cronico") == 0) { // Listar los registros clínicos
+                aModificar = 3;
             }
 
             else if (strcmp(argv[i], "-h") == 0) { // Menú de Ayuda
