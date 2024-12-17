@@ -2,6 +2,15 @@
 
 Un programa de consola en C++ para gestionar de manera eficiente la administración de hospitales, con funciones para manejar pacientes, médicos y citas médicas. Además, permite realizar copias de seguridad de la información.
 
+## Descargar y Ejecutar
+```
+git clone https://github.com/Locotir/Simulador-Gestion-Hospitalaria
+cd Simulador-Gestion-Hospitalaria
+./build.sh
+cd build
+./SGH
+```
+
 
 ## Funcionalidades
 
