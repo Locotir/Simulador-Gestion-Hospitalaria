@@ -1,13 +1,7 @@
 #ifndef MEDICOS_HPP
 #define MEDICOS_HPP
 
-#include <vector>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <algorithm>
-#include <stdexcept>  // Necesario para std::runtime_error
+#include "main.hpp"
 
 // Clase Medico que contiene la información de un médico
 class Medico {

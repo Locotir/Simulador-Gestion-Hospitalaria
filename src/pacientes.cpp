@@ -1,13 +1,7 @@
 #include "main.hpp" //bcolors
 #include "pacientes.hpp"
 #include "medicos.hpp"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
-#include <stdexcept>
-#include <locale>  
+
 
 // Constructor de Paciente
 Paciente::Paciente(int id, const std::string& nombre, int edad, const std::string& fechaIngreso, int disponibilidad)

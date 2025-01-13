@@ -1,11 +1,5 @@
 #include "main.hpp" //bcolors
 #include "medicos.hpp"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
-#include <stdexcept>
 
 // Constructor de Medico
 Medico::Medico(int id, const std::string& nombre, const std::string& especialidad, int disponibilidad)

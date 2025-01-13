@@ -1,9 +1,7 @@
 #ifndef CITAS_HPP
 #define CITAS_HPP
 
-#include <string>
-#include <iostream>
-#include <vector>
+#include "main.hpp"
 
 class Paciente;
 class Medico;

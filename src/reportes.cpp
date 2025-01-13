@@ -1,9 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
 #include "pacientes.hpp"
 #include "medicos.hpp"
 #include "main.hpp"

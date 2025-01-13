@@ -2,10 +2,7 @@
 #include "citas.hpp"
 #include "pacientes.hpp"
 #include "medicos.hpp"
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <algorithm>
+
 
 Cita::Cita(int id, int idPaciente, int idMedico,
            const std::string& fecha, const std::string& descripcion, const std::string& urgencia,

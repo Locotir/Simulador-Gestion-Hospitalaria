@@ -1,13 +1,6 @@
 #ifndef PACIENTES_HPP
 #define PACIENTES_HPP
 
-#include <vector>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <algorithm>
-#include <stdexcept>  // Necesario para std::runtime_error
 #include "citas.hpp"  // Acceder a la clase Cita
 #include "medicos.hpp"
 
