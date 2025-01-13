@@ -1150,7 +1150,7 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
 
             else if (strcmp(argv[i], "--reporte") == 0) { // Listar los registros clínicos
                 operacion = 3;
-                aModificar = 1;
+                aModificar = 3;
             }
             else if (strcmp(argv[i], "-cronico") == 0) { // Listar los registros clínicos crónicos
                 aModificar = 3;
