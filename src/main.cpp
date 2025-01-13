@@ -977,6 +977,8 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
 // |||||||||||||||||||||||||||||||||||||||||||||||||||| CLI FLAG ARGUMENTS ||||||||||||||||||||||||||||||||||||||||||||||||||||
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     } else { // Ejecutar argumentos en CLI
+
+//  Definimos ciertos valores -1 y otros vacíos para gestionar correctamente como operar con los datos especificos proporcionados por el usuario, los datos esenciales no introducidos serán pedidos a introducir más adelante.
         int gestion; // {pacientes, medicos, citas}
         int operacion; // 
         int id = -1;
@@ -1028,6 +1030,8 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                     return 1;
                 }
             }
+
+
             else if (strcmp(argv[i], "-id") == 0 && i + 1 < argc) { // ID de individuo
                 id = std::atoi(argv[i + 1]); 
                 i++;
@@ -1062,11 +1066,11 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
                 i++;
             }
                        
-            else if (strcmp(argv[i], "-alta") == 0) { // para pacientes y medicos
+            else if (strcmp(argv[i], "-alta") == 0) { // Alta para pacientes y medicos
                 operacion = 1;
                 nuevaDisponibilidad = 1;  // Alta
             }
-            else if (strcmp(argv[i], "-baja") == 0) { // para pacientes y médicos
+            else if (strcmp(argv[i], "-baja") == 0) { // Baja para pacientes y médicos
                 operacion = 1;
                 nuevaDisponibilidad = 0;  // Baja
             }
@@ -1192,5 +1196,5 @@ int main(int argc, char *argv[]) { // Coger argumentos de ejecuccion
 }
 
 // ##################################################################################################################################################################
-// ##################################################################################################################################################################
+// ########################################################################## E N D #################################################################################
 // ##################################################################################################################################################################
