@@ -16,36 +16,36 @@ cd build
 
 ### Gestionar Pacientes 🧑
 
-Alta/Baja de pacientes.
+- Alta/Baja de pacientes.
 
-Modificar datos de pacientes.
+- Modificar datos de pacientes.
 
-Buscar pacientes.
+- Buscar pacientes.
 
-Consultar historial clínico.
+- Consultar historial clínico.
 
 ### Gestionar Médicos 👨‍⚕️
 
-Alta/Baja de médicos.
+- Alta/Baja de médicos.
 
-Asignar especialidad.
+- Asignar especialidad.
 
-Listar médicos por especialidad o disponibilidad.
+- Listar médicos por especialidad o disponibilidad.
 
 ### Gestionar Citas Médicas 🗎
 
-Asignar nuevas citas.
+- Asignar nuevas citas.
 
-Ordenar citas por fecha o urgencia.
+- Ordenar citas por fecha o urgencia.
 
-Consultar registros de citas.
+- Consultar registros de citas.
 
-Cancelar o modificar citas.
+- Cancelar o modificar citas.
 
 
 ### Realizar Backup ⎗
 
-Generar una copia de seguridad de los datos.
+- Generar una copia de seguridad de los datos.
 
 # Diagrama
 
